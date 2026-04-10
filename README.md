@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📖 PagePulse
 
-## Getting Started
+**Track your reading, feel the pulse.**
 
-First, run the development server:
+PagePulse is a modern reading tracker that helps you build consistent reading habits. Set monthly goals, track your reading time, review books, and join discussions with fellow readers.
 
-```bash
+🔗 **Live Demo:** [pagepulse.vercel.app](https://pagepulse.vercel.app)
+
+---
+
+## ✨ Features
+
+### 📊 Dashboard
+- Real-time reading timer (start/pause/stop)
+- Today's reading summary
+- Weekly reading summary
+- Total sessions count
+- Reading streak tracker
+
+### 🎯 Goals & Targets
+- Set monthly reading targets (minutes & pages)
+- Track progress with visual progress bars
+- Automatic progress calculation
+
+### 📈 Statistics
+- Total reading time
+- Total pages read
+- Average per session
+- Best reading day
+- Monthly breakdown
+
+### 🏆 Achievements
+- 10+ badges to unlock
+- Progress tracking for each achievement
+- Visual rewards system
+
+### ⭐ Book Reviews
+- Rate books 1-5 stars
+- Write detailed reviews
+- Edit or delete your reviews
+- Like other users' reviews
+
+### 💬 Discussion Forum
+- Create discussion topics
+- Reply to existing topics
+- View count tracking
+- Organized by book title
+
+### 🔐 Authentication
+- Email signup with email verification
+- Strong password validation (uppercase, lowercase, number, special char)
+- Password strength indicator
+- Secure login/logout
+- Protected routes
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| Database | Supabase (PostgreSQL) |
+| Authentication | Supabase Auth |
+| Icons | Lucide React |
+| Deployment | Vercel |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Supabase account (free)
+
+### Environment Variables
+
+Create `.env.local` file:
+
+```env```
+```NEXT_PUBLIC_SUPABASE_URL=your_supabase_url```
+```NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key```
+
+### Installation
+# Clone repository
+git clone https://github.com/fitriadamayanti12/pagepulse.git
+cd pagepulse
+
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

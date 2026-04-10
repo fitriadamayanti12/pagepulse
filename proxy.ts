@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: req.headers,
@@ -36,8 +36,7 @@ export async function middleware(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  // Halaman yang memerlukan login
-  const protectedPaths = ['/goals', '/history', '/stats', '/achievements', '/reviews', '/discussion'];
+  const protectedPaths = ['/dashboard', '/goals', '/history', '/stats', '/achievements', '/reviews', '/discussion'];
   const isProtected = protectedPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
   if (isProtected && !session) {
@@ -46,9 +45,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Jika sudah login dan mencoba akses login/signup, redirect ke dashboard
+  if (session && req.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+
   if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/', req.url));
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   return response;
