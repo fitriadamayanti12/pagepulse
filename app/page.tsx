@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, Target, BookOpen, Flame } from 'lucide-react';
 import Timer from '@/components/Timer';
+import Link from 'next/link';
 
 export default function Home() {
   const [todayMinutes, setTodayMinutes] = useState(0);
