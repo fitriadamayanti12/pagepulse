@@ -1,65 +1,135 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Card, CardContent } from '@/components/ui/card';
+import { Clock, Target, BookOpen, Flame } from 'lucide-react';
+import Timer from '@/components/Timer';
 
 export default function Home() {
+  const [todayMinutes, setTodayMinutes] = useState(0);
+  const [weeklyMinutes, setWeeklyMinutes] = useState(0);
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      // Ambil data hari ini
+      const { data: todayData } = await supabase
+        .from('reading_sessions')
+        .select('duration_minutes')
+        .eq('date', today);
+
+      // Ambil data minggu ini
+      const { data: weekData } = await supabase
+        .from('reading_sessions')
+        .select('duration_minutes')
+        .gte('date', weekAgo.toISOString().split('T')[0]);
+
+      // Ambil total sesi
+      const { count: sessionsCount } = await supabase
+        .from('reading_sessions')
+        .select('*', { count: 'exact', head: true });
+
+      const totalToday = todayData?.reduce((sum, s) => sum + s.duration_minutes, 0) || 0;
+      const totalWeek = weekData?.reduce((sum, s) => sum + s.duration_minutes, 0) || 0;
+
+      setTodayMinutes(totalToday);
+      setWeeklyMinutes(totalWeek);
+      setTotalSessions(sessionsCount || 0);
+
+      // Hitung streak sederhana (hari berturut-turut dengan catatan)
+      const { data: last7Days } = await supabase
+        .from('reading_sessions')
+        .select('date')
+        .gte('date', weekAgo.toISOString().split('T')[0])
+        .order('date', { ascending: false });
+
+      const uniqueDays = [...new Set(last7Days?.map(s => s.date) || [])];
+      setStreak(uniqueDays.length);
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-gray-500">Memuat data...</p>
+      </main>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
+        {/* Header */}
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            PagePulse
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-base md:text-lg text-gray-500">
+            Track your reading, feel the pulse
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <Clock className="w-6 h-6 md:w-8 md:h-8 mb-2 opacity-90" />
+              <p className="text-2xl md:text-3xl font-bold">
+                {Math.floor(todayMinutes / 60)}h {todayMinutes % 60}m
+              </p>
+              <p className="text-xs md:text-sm opacity-90">Hari ini</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <Target className="w-6 h-6 md:w-8 md:h-8 mb-2 opacity-90" />
+              <p className="text-2xl md:text-3xl font-bold">
+                {Math.floor(weeklyMinutes / 60)}h {weeklyMinutes % 60}m
+              </p>
+              <p className="text-xs md:text-sm opacity-90">Minggu ini</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <BookOpen className="w-6 h-6 md:w-8 md:h-8 mb-2 opacity-90" />
+              <p className="text-2xl md:text-3xl font-bold">{totalSessions}</p>
+              <p className="text-xs md:text-sm opacity-90">Total sesi</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg">
+            <CardContent className="p-4 md:p-6">
+              <Flame className="w-6 h-6 md:w-8 md:h-8 mb-2 opacity-90" />
+              <p className="text-2xl md:text-3xl font-bold">{streak}</p>
+              <p className="text-xs md:text-sm opacity-90">Hari aktif</p>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
+
+        {/* Timer Section */}
+        <div className="mb-8 md:mb-12">
+          <h2 className="text-xl md:text-2xl font-semibold mb-4 text-center">📖 Mulai Membaca</h2>
+          <Timer />
+        </div>
+
+        {/* Motivational Quote */}
+        <div className="text-center text-gray-400 text-xs md:text-sm border-t pt-6 md:pt-8">
+          <p>"Setiap halaman yang kau baca, denyut nadimu untuk pengetahuan."</p>
+        </div>
+      </div>
+    </main>
   );
 }
