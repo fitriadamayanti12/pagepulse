@@ -9,7 +9,7 @@ interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   requirement: number;
   current: number;
   unlocked: boolean;
