@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, Pause, Square } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { showToast } from './Toast';
 
 export default function Timer() {
   const [isRunning, setIsRunning] = useState(false);
@@ -12,10 +13,21 @@ export default function Timer() {
   const [bookTitle, setBookTitle] = useState('');
   const [pagesRead, setPagesRead] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<Date | null>(null);
   let interval: NodeJS.Timeout;
 
   useEffect(() => {
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUserId();
+  }, []);
+
+  useEffect(() => {
     if (isRunning) {
+      setStartTime(new Date());
       interval = setInterval(() => {
         setSeconds(prev => prev + 1);
       }, 1000);
@@ -29,41 +41,42 @@ export default function Timer() {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
-    if (hours > 0) {
-      return `${hours} jam ${minutes} menit ${secs} detik`;
-    } else if (minutes > 0) {
-      return `${minutes} menit ${secs} detik`;
-    }
-    return `${secs} detik`;
+    if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
+    if (minutes > 0) return `${minutes}m ${secs}s`;
+    return `${secs}s`;
   };
 
   const handleStart = () => setIsRunning(true);
   const handlePause = () => setIsRunning(false);
   
   const handleStop = async () => {
-    if (seconds === 0) return;
+    if (seconds === 0 || !userId) return;
     
     setIsSaving(true);
-    const durationMinutes = Math.floor(seconds / 60);
     
+    // Hanya kirim kolom yang ada di database
     const { error } = await supabase.from('reading_sessions').insert([
       {
-        duration_minutes: durationMinutes,
+        user_id: userId,
+        duration_seconds: seconds,
         pages_read: pagesRead ? parseInt(pagesRead) : null,
         book_title: bookTitle || null,
+        started_at: startTime?.toISOString(),
       }
     ]);
 
     setIsSaving(false);
     
     if (error) {
-      alert('Gagal menyimpan: ' + error.message);
+      console.error('Save error:', error);
+      showToast('Failed to save: ' + error.message, 'error');
     } else {
       setSeconds(0);
       setBookTitle('');
       setPagesRead('');
-      alert('✅ Sesi membaca berhasil disimpan!');
-      window.location.reload();
+      setStartTime(null);
+      showToast('Reading session saved successfully', 'success');
+      setTimeout(() => window.location.reload(), 1500);
     }
   };
 
@@ -82,7 +95,7 @@ export default function Timer() {
                 size="lg"
                 className="bg-green-600 hover:bg-green-700 text-white px-6 md:px-8 py-4 md:py-6 text-base md:text-lg"
               >
-                <Play className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Mulai Membaca
+                <Play className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Start Reading
               </Button>
             ) : (
               <Button 
@@ -91,7 +104,7 @@ export default function Timer() {
                 variant="outline"
                 className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 px-6 md:px-8 py-4 md:py-6 text-base md:text-lg"
               >
-                <Pause className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Jeda
+                <Pause className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Pause
               </Button>
             )}
             <Button 
@@ -101,7 +114,7 @@ export default function Timer() {
               disabled={seconds === 0}
               className="px-6 md:px-8 py-4 md:py-6 text-base md:text-lg"
             >
-              <Square className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Selesai
+              <Square className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Finish
             </Button>
           </div>
         </div>
@@ -110,26 +123,26 @@ export default function Timer() {
           <div className="border-t pt-4 md:pt-6 mt-4 space-y-3 md:space-y-4">
             <div>
               <label className="block text-sm md:text-base font-medium mb-1 text-gray-700">
-                📖 Judul Buku
+                📖 Book Title
               </label>
               <input
                 type="text"
                 value={bookTitle}
                 onChange={(e) => setBookTitle(e.target.value)}
                 className="w-full border rounded-lg px-3 md:px-4 py-2 md:py-3 text-base"
-                placeholder="Contoh: Bumi Manusia"
+                placeholder="Example: Bumi Manusia"
               />
             </div>
             <div>
               <label className="block text-sm md:text-base font-medium mb-1 text-gray-700">
-                📄 Halaman yang Dibaca
+                📄 Pages Read
               </label>
               <input
                 type="number"
                 value={pagesRead}
                 onChange={(e) => setPagesRead(e.target.value)}
                 className="w-full border rounded-lg px-3 md:px-4 py-2 md:py-3 text-base"
-                placeholder="Contoh: 25"
+                placeholder="Example: 25"
               />
             </div>
           </div>
@@ -137,7 +150,7 @@ export default function Timer() {
 
         {isSaving && (
           <div className="text-center text-gray-500 mt-4 text-base">
-            Menyimpan sesi membaca...
+            Saving reading session...
           </div>
         )}
       </CardContent>

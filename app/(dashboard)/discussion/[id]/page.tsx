@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, MessageCircle, Eye } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Eye, User, Calendar, Send } from 'lucide-react';
+import { showToast } from '@/components/Toast';
 
 interface Topic {
   id: string;
@@ -93,14 +94,16 @@ export default function TopicDetailPage() {
     ]);
 
     if (!error) {
-      // Update replies count
       await supabase
         .from('discussion_topics')
         .update({ replies_count: (topic?.replies_count || 0) + 1 })
         .eq('id', id);
 
       setNewPost('');
+      showToast('Reply posted successfully', 'success');
       fetchData();
+    } else {
+      showToast('Failed to post reply', 'error');
     }
 
     setSubmitting(false);
@@ -108,99 +111,145 @@ export default function TopicDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Memuat diskusi...</p>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!topic) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Topik tidak ditemukan</p>
+      <div className="flex items-center justify-center h-64">
+        <p className="text-gray-500">Topic not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Back Button */}
-        <Link href="/discussion" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4">
+    <div className="max-w-4xl mx-auto">
+      {/* Back Button */}
+      <div className="mb-4">
+        <Link
+          href="/discussion"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
-          Kembali ke diskusi
+          Back to Discussions
         </Link>
-
-        {/* Topic */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="mb-2">
-              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                {topic.book_title}
-              </span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-3">{topic.title}</h1>
-            <p className="text-gray-700 whitespace-pre-wrap">{topic.content}</p>
-            <div className="flex items-center gap-4 mt-4 text-xs text-gray-400">
-              <span className="flex items-center gap-1">
-                <MessageCircle className="w-3 h-3" />
-                {topic.replies_count} balasan
-              </span>
-              <span className="flex items-center gap-1">
-                <Eye className="w-3 h-3" />
-                {topic.views_count} dilihat
-              </span>
-              <span>{new Date(topic.created_at).toLocaleDateString('id-ID')}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Posts */}
-        <div className="space-y-4 mb-6">
-          <h2 className="text-lg font-semibold text-gray-800">Diskusi ({posts.length})</h2>
-          {posts.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-gray-400">
-                Belum ada balasan. Jadilah yang pertama!
-              </CardContent>
-            </Card>
-          )}
-          {posts.map((post) => (
-            <Card key={post.id}>
-              <CardContent className="p-4">
-                <p className="text-gray-700">{post.content}</p>
-                <p className="text-xs text-gray-400 mt-2">
-                  {new Date(post.created_at).toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'long',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Form Balasan */}
-        <Card>
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <textarea
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                placeholder="Tulis balasanmu di sini..."
-                rows={4}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-                required
-              />
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'Mengirim...' : 'Kirim Balasan'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* Topic Card */}
+      <Card className="mb-6 shadow-sm border">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+              {topic.book_title}
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{topic.title}</h1>
+          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{topic.content}</p>
+
+          <div className="flex items-center gap-4 mt-5 pt-3 border-t text-xs text-gray-400">
+            <span className="flex items-center gap-1.5">
+              <MessageCircle className="w-3.5 h-3.5" />
+              {topic.replies_count} {topic.replies_count === 1 ? 'reply' : 'replies'}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Eye className="w-3.5 h-3.5" />
+              {topic.views_count} views
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" />
+              {new Date(topic.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Posts/Replies Section */}
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          Discussion ({posts.length})
+        </h2>
+
+        {posts.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-12 text-center">
+              <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p className="text-gray-500">No replies yet</p>
+              <p className="text-sm text-gray-400 mt-1">Be the first to reply!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post, index) => (
+              <Card key={post.id} className="border">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-gray-800">
+                          {index === 0 ? 'Topic Creator' : 'Reader'}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(post.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">{post.content}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Reply Form */}
+      <Card className="shadow-sm border">
+        <CardContent className="p-6">
+          <h3 className="text-md font-semibold text-gray-800 mb-3">Write a Reply</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <textarea
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              placeholder="Share your thoughts about this topic..."
+              rows={4}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+              required
+            />
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              {submitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Posting...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Post Reply
+                </div>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
