@@ -4,59 +4,66 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Target, Calendar, Clock, BookOpen, TrendingUp, Save, Sparkles, Award, Zap, ChevronRight } from 'lucide-react';
+import { Target, Calendar, Clock, BookOpen, TrendingUp, Save, Sparkles, Award, Zap, ChevronRight, ChevronLeft, ChevronDown } from 'lucide-react';
 import { showToast } from '@/components/Toast';
 import Link from 'next/link';
 
 export default function GoalsPage() {
   const [targetMinutes, setTargetMinutes] = useState('');
   const [targetPages, setTargetPages] = useState('');
-  const [currentMonth, setCurrentMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [currentProgress, setCurrentProgress] = useState({ minutes: 0, pages: 0 });
   const [existingGoal, setExistingGoal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'time' | 'pages'>('time');
 
+  const currentMonthStr = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-01`;
+
   useEffect(() => {
-    const fetchData = async () => {
-      const today = new Date();
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-      const monthStr = monthStart.toISOString().split('T')[0];
-      setCurrentMonth(monthStr);
-
-      const { data: goal } = await supabase
-        .from('reading_goals')
-        .select('*')
-        .eq('month', monthStr)
-        .single();
-
-      if (goal) {
-        setExistingGoal(goal);
-        setTargetMinutes(goal.target_minutes?.toString() || '');
-        setTargetPages(goal.target_pages?.toString() || '');
-      }
-
-      const { data: sessions } = await supabase
-        .from('reading_sessions')
-        .select('duration_seconds, pages_read')
-        .gte('date', monthStr);
-
-      const totalSeconds = sessions?.reduce((sum, s) => sum + (s.duration_seconds || 0), 0) || 0;
-      const totalMinutes = Math.floor(totalSeconds / 60);
-      const totalPages = sessions?.reduce((sum, s) => sum + (s.pages_read || 0), 0) || 0;
-
-      setCurrentProgress({ minutes: totalMinutes, pages: totalPages });
-      setLoading(false);
-    };
-
     fetchData();
-  }, []);
+  }, [selectedYear, selectedMonth]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const monthStr = currentMonthStr.split('T')[0].substring(0, 7);
+
+    const { data: goal } = await supabase
+      .from('reading_goals')
+      .select('*')
+      .eq('month', monthStr)
+      .single();
+
+    if (goal) {
+      setExistingGoal(goal);
+      setTargetMinutes(goal.target_minutes?.toString() || '');
+      setTargetPages(goal.target_pages?.toString() || '');
+    } else {
+      setExistingGoal(null);
+      setTargetMinutes('');
+      setTargetPages('');
+    }
+
+    const { data: sessions } = await supabase
+      .from('reading_sessions')
+      .select('duration_seconds, pages_read')
+      .gte('date', monthStr)
+      .lt('date', `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-01`);
+
+    const totalSeconds = sessions?.reduce((sum, s) => sum + (s.duration_seconds || 0), 0) || 0;
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const totalPages = sessions?.reduce((sum, s) => sum + (s.pages_read || 0), 0) || 0;
+
+    setCurrentProgress({ minutes: totalMinutes, pages: totalPages });
+    setLoading(false);
+  };
 
   const handleSave = async () => {
     setSaving(true);
     
-    const monthStart = currentMonth;
+    const monthStr = currentMonthStr.substring(0, 7);
     const minutes = parseInt(targetMinutes) || 0;
     const pages = parseInt(targetPages) || 0;
 
@@ -74,7 +81,7 @@ export default function GoalsPage() {
     } else {
       const { error } = await supabase
         .from('reading_goals')
-        .insert([{ month: currentMonth, target_minutes: minutes, target_pages: pages }]);
+        .insert([{ month: monthStr, target_minutes: minutes, target_pages: pages }]);
       
       if (error) {
         showToast('Gagal menyimpan target', 'error');
@@ -83,18 +90,8 @@ export default function GoalsPage() {
       }
     }
 
-    const { data: sessions } = await supabase
-      .from('reading_sessions')
-      .select('duration_seconds, pages_read')
-      .gte('date', monthStart);
-
-    const totalSeconds = sessions?.reduce((sum, s) => sum + (s.duration_seconds || 0), 0) || 0;
-    const totalMinutes = Math.floor(totalSeconds / 60);
-    const totalPages = sessions?.reduce((sum, s) => sum + (s.pages_read || 0), 0) || 0;
-
-    setCurrentProgress({ minutes: totalMinutes, pages: totalPages });
-    setExistingGoal({ target_minutes: minutes, target_pages: pages });
     showToast('Target berhasil disimpan', 'success');
+    fetchData();
     setSaving(false);
   };
 
@@ -105,7 +102,7 @@ export default function GoalsPage() {
     ? Math.min(100, Math.round((currentProgress.pages / existingGoal.target_pages) * 100))
     : 0;
 
-  const monthName = new Date(currentMonth).toLocaleDateString('id-ID', { 
+  const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleDateString('id-ID', { 
     month: 'long', 
     year: 'numeric' 
   });
@@ -131,6 +128,45 @@ export default function GoalsPage() {
     return { text: '🎯 Tetapkan target dan mulailah!', icon: Target, color: 'from-purple-500 to-pink-500' };
   };
 
+  const changeMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (selectedMonth === 1) {
+        setSelectedMonth(12);
+        setSelectedYear(selectedYear - 1);
+      } else {
+        setSelectedMonth(selectedMonth - 1);
+      }
+    } else {
+      if (selectedMonth === 12) {
+        setSelectedMonth(1);
+        setSelectedYear(selectedYear + 1);
+      } else {
+        setSelectedMonth(selectedMonth + 1);
+      }
+    }
+    setShowMonthPicker(false);
+  };
+
+  const motivational = getMotivationalMessage();
+  const MotivationIcon = motivational.icon;
+
+  const monthOptions = [
+    { value: 1, label: 'Januari', short: 'Jan' },
+    { value: 2, label: 'Februari', short: 'Feb' },
+    { value: 3, label: 'Maret', short: 'Mar' },
+    { value: 4, label: 'April', short: 'Apr' },
+    { value: 5, label: 'Mei', short: 'Mei' },
+    { value: 6, label: 'Juni', short: 'Jun' },
+    { value: 7, label: 'Juli', short: 'Jul' },
+    { value: 8, label: 'Agustus', short: 'Agu' },
+    { value: 9, label: 'September', short: 'Sep' },
+    { value: 10, label: 'Oktober', short: 'Okt' },
+    { value: 11, label: 'November', short: 'Nov' },
+    { value: 12, label: 'Desember', short: 'Des' },
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -141,9 +177,6 @@ export default function GoalsPage() {
       </div>
     );
   }
-
-  const motivational = getMotivationalMessage();
-  const MotivationIcon = motivational.icon;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -158,24 +191,133 @@ export default function GoalsPage() {
               </div>
             </div>
             <div>
-              <h1 className="text-4xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">
                 Target Bulanan
               </h1>
-              <p className="text-lg sm:text-xl text-gray-500 mt-2 flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                {monthName}
+              <p className="text-lg sm:text-xl text-gray-500 mt-2">
+                Tetapkan dan pantau target membaca
               </p>
             </div>
           </div>
           
-          {existingGoal && (
-            <Link href="/history">
-              <Button variant="outline" size="lg" className="gap-2 text-lg px-5 py-6 h-auto">
-                Riwayat
-                <ChevronRight className="w-5 h-5" />
-              </Button>
-            </Link>
-          )}
+          <Link href="/history">
+            <Button variant="outline" size="lg" className="gap-2 text-lg px-5 py-6 h-auto">
+              Riwayat
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Elegant Month/Year Selector */}
+      <div className="mb-8">
+        <div className="flex items-center justify-center">
+          <div className="inline-flex items-center gap-1 sm:gap-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-1.5">
+            <button
+              onClick={() => changeMonth('prev')}
+              className="p-3 hover:bg-gray-100 rounded-xl transition-all hover:scale-105 active:scale-95"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            
+            <div className="relative">
+              <button
+                onClick={() => setShowMonthPicker(!showMonthPicker)}
+                className="flex items-center gap-3 px-6 sm:px-8 py-3 hover:bg-gray-50 rounded-xl transition-all"
+              >
+                <Calendar className="w-5 h-5 text-blue-600" />
+                <span className="text-xl sm:text-2xl font-semibold text-gray-900 min-w-[180px] sm:min-w-[220px]">
+                  {monthName}
+                </span>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${showMonthPicker ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Elegant Dropdown */}
+              {showMonthPicker && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowMonthPicker(false)}
+                  />
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white rounded-2xl shadow-xl border border-gray-200 p-6 z-50 min-w-[320px] sm:min-w-[380px] animate-in fade-in zoom-in-95 duration-200">
+                    {/* Month Grid */}
+                    <div className="mb-6">
+                      <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Pilih Bulan</p>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {monthOptions.map((month) => (
+                          <button
+                            key={month.value}
+                            onClick={() => {
+                              setSelectedMonth(month.value);
+                              setShowMonthPicker(false);
+                            }}
+                            className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                              selectedMonth === month.value
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            <span className="hidden sm:inline">{month.label}</span>
+                            <span className="sm:hidden">{month.short}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Year Selector */}
+                    <div>
+                      <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Pilih Tahun</p>
+                      <div className="flex items-center justify-center gap-4">
+                        <button
+                          onClick={() => setSelectedYear(selectedYear - 1)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <ChevronLeft className="w-4 h-4 text-gray-500" />
+                        </button>
+                        <span className="text-2xl font-bold text-gray-900 min-w-[80px] text-center">
+                          {selectedYear}
+                        </span>
+                        <button
+                          onClick={() => setSelectedYear(selectedYear + 1)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Quick Actions */}
+                    <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-3">
+                      <button
+                        onClick={() => {
+                          const today = new Date();
+                          setSelectedMonth(today.getMonth() + 1);
+                          setSelectedYear(today.getFullYear());
+                          setShowMonthPicker(false);
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        Bulan Ini
+                      </button>
+                      <button
+                        onClick={() => setShowMonthPicker(false)}
+                        className="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-md transition-all"
+                      >
+                        Pilih
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <button
+              onClick={() => changeMonth('next')}
+              className="p-3 hover:bg-gray-100 rounded-xl transition-all hover:scale-105 active:scale-95"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -323,7 +465,6 @@ export default function GoalsPage() {
           
           {existingGoal && (existingGoal.target_minutes > 0 || existingGoal.target_pages > 0) ? (
             <div className="space-y-7">
-              {/* Time Progress */}
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <div className="flex items-center gap-3">
@@ -345,7 +486,6 @@ export default function GoalsPage() {
                 </p>
               </div>
 
-              {/* Pages Progress */}
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <div className="flex items-center gap-3">
@@ -367,7 +507,6 @@ export default function GoalsPage() {
                 </p>
               </div>
 
-              {/* Overall */}
               <div className="pt-5 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className="text-lg text-gray-600">Keseluruhan</span>
