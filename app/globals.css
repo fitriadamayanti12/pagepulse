@@ -128,3 +128,352 @@
     @apply font-sans;
   }
 }
+
+/* ============================================
+   CUSTOM RESPONSIVE UTILITIES - TAILWIND V4
+   ============================================ */
+
+/* Responsive Container */
+@utility container-responsive {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+  
+  @media (width >= 40rem) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  @media (width >= 64rem) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@utility container-narrow {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 56rem;
+  
+  @media (width >= 40rem) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  @media (width >= 64rem) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Responsive Typography */
+@utility text-responsive-hero {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  
+  @media (width >= 40rem) {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  
+  @media (width >= 48rem) {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  
+  @media (width >= 64rem) {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+}
+
+@utility text-responsive-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  
+  @media (width >= 40rem) {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  @media (width >= 48rem) {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+}
+
+@utility text-responsive-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  
+  @media (width >= 40rem) {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  @media (width >= 48rem) {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+@utility text-responsive-body {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  
+  @media (width >= 40rem) {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
+
+/* Responsive Grid */
+@utility grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  
+  @media (width >= 40rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+@utility grid-responsive-2 {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  
+  @media (width >= 40rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Responsive Spacing */
+@utility section-padding {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  
+  @media (width >= 40rem) {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  
+  @media (width >= 48rem) {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+  
+  @media (width >= 64rem) {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+@utility section-padding-sm {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  
+  @media (width >= 40rem) {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  
+  @media (width >= 48rem) {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+/* Responsive Card */
+@utility card-responsive {
+  padding: 1rem;
+  
+  @media (width >= 40rem) {
+    padding: 1.25rem;
+  }
+  
+  @media (width >= 48rem) {
+    padding: 1.5rem;
+  }
+}
+
+/* Responsive Flex */
+@utility flex-responsive {
+  display: flex;
+  flex-direction: column;
+  
+  @media (width >= 40rem) {
+    flex-direction: row;
+  }
+}
+
+@utility flex-center-responsive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  @media (width >= 40rem) {
+    flex-direction: row;
+  }
+}
+
+/* Touch Target */
+@utility touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Button Group */
+@utility button-group-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  @media (width >= 40rem) {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+}
+
+/* Hover Lift */
+@utility hover-lift {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Safe Area */
+@utility safe-padding-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+}
+
+@utility safe-padding-top {
+  padding-top: max(env(safe-area-inset-top), 1rem);
+}
+
+/* Navbar */
+@utility navbar-responsive {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  
+  @media (width >= 40rem) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+/* Stack Mobile */
+@utility stack-mobile {
+  flex-direction: column;
+  
+  @media (width >= 40rem) {
+    flex-direction: row;
+  }
+}
+
+/* Hide Utilities */
+@utility hide-on-mobile {
+  @media (width < 40rem) {
+    display: none;
+  }
+}
+
+@utility hide-on-desktop {
+  @media (width >= 40rem) {
+    display: none;
+  }
+}
+
+/* Image Responsive */
+@utility img-responsive {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* ============================================
+   ADDITIONAL STYLES
+   ============================================ */
+
+/* Hover effects only on devices that support hover */
+@media (hover: hover) {
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+}
+
+/* Mobile touch targets */
+@media (width < 40rem) {
+  button, 
+  .button,
+  [role="button"],
+  a.button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fix untuk button yang terpotong di mobile */
+@media (width < 40rem) {
+  .button,
+  button[class*="button"] {
+    white-space: normal !important;
+    word-break: break-word;
+  }
+  
+  /* Pastikan container tidak overflow */
+  body {
+    overflow-x: hidden;
+  }
+  
+  #__next,
+  main {
+    overflow-x: hidden;
+  }
+}
