@@ -12,6 +12,7 @@ interface Review {
   created_at: string;
   user_id: string;
   user_email?: string;
+  username?: string;
 }
 
 interface ReviewsListProps {

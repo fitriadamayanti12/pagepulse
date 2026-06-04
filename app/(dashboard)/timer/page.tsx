@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 import { ArrowLeft, BookOpen, BookMarked } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { showToast } from '@/components/Toast';
 import TimerDisplay from '@/components/timer/TimerDisplay';
 import TimerControls from '@/components/timer/TimerControls';
 import SessionComplete from '@/components/timer/SessionComplete';
@@ -17,13 +19,17 @@ export default function TimerPage() {
   const [sessionComplete, setSessionComplete] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [startTime, setStartTime] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Initial loading
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
+    const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
+  // Timer interval
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => setSeconds(prev => prev + 1), 1000);
@@ -33,25 +39,56 @@ export default function TimerPage() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isRunning]);
 
+  // ===== START READING =====
   const handleStart = () => {
     if (!bookTitle.trim()) return;
     setHasStarted(true);
     setIsRunning(true);
+    setStartTime(new Date().toISOString()); // Record waktu mulai (local time)
   };
 
+  // Pause/Resume
   const toggleTimer = () => setIsRunning(!isRunning);
-  const completeSession = () => { setIsRunning(false); setSessionComplete(true); };
 
-  const handleSave = () => {
-    console.log({ bookTitle, pages, duration: seconds });
+  // Stop timer → show pages input
+  const completeSession = () => {
     setIsRunning(false);
-    setSeconds(0);
-    setSessionComplete(false);
-    setHasStarted(false);
-    setBookTitle('');
-    setPages('');
+    setSessionComplete(true);
   };
 
+  // ===== SAVE TO SUPABASE =====
+  const handleSave = async () => {
+    setSaving(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const sessionData = {
+      user_id: user?.id,
+      book_title: bookTitle.trim(),
+      duration_seconds: seconds,
+      pages_read: parseInt(pages) || 0,
+      date: new Date().toISOString().split('T')[0],
+      started_at: startTime, // Waktu mulai baca (local time)
+    };
+
+    console.log('Saving session:', sessionData);
+
+    const { error } = await supabase
+      .from('reading_sessions')
+      .insert([sessionData]);
+
+    setSaving(false);
+
+    if (error) {
+      console.error('Save error:', error);
+      showToast('Failed to save session', 'error');
+    } else {
+      showToast('Reading session saved! 🎉', 'success');
+      resetTimer();
+    }
+  };
+
+  // ===== RESET =====
   const resetTimer = () => {
     setIsRunning(false);
     setSeconds(0);
@@ -59,8 +96,10 @@ export default function TimerPage() {
     setHasStarted(false);
     setBookTitle('');
     setPages('');
+    setStartTime(null);
   };
 
+  // ===== HELPERS =====
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
     if (h > 0) return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
@@ -78,7 +117,9 @@ export default function TimerPage() {
     return '🏆 Reading champion!';
   };
 
-  // Loading state - reuse dari Dashboard
+  // ==========================================
+  // RENDER
+  // ==========================================
   if (isLoading) return <LoadingState />;
 
   // Step 1: Input Book Title
@@ -89,7 +130,6 @@ export default function TimerPage() {
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           Back to Dashboard
         </Link>
-
         <div className="w-full max-w-lg bg-white/60 backdrop-blur-xl rounded-3xl p-8 sm:p-10 border-2 border-amber-100/40 shadow-2xl text-center">
           <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-xl shadow-amber-200/30 mx-auto mb-6 animate-bounce-gentle">
             <BookMarked className="w-10 h-10 text-white" />
@@ -131,7 +171,7 @@ export default function TimerPage() {
       <div className="flex-1 flex flex-col items-center justify-center space-y-8">
         <TimerDisplay seconds={seconds} isRunning={isRunning} formatTime={formatTime} getProgressPercent={getProgressPercent} getMotivationalText={getMotivationalText} />
         {!sessionComplete && <TimerControls isRunning={isRunning} seconds={seconds} sessionComplete={sessionComplete} onToggle={toggleTimer} onReset={resetTimer} onComplete={completeSession} />}
-        {sessionComplete && <SessionComplete pages={pages} bookTitle={bookTitle} onPagesChange={setPages} onBookTitleChange={setBookTitle} onSave={handleSave} />}
+        {sessionComplete && <SessionComplete pages={pages} bookTitle={bookTitle} onPagesChange={setPages} onBookTitleChange={setBookTitle} onSave={handleSave} saving={saving} />}
         {!sessionComplete && (
           <div className="text-center text-base text-[#9b8d80] font-semibold">
             <BookOpen className="w-5 h-5 text-amber-500 inline-block mr-2" /> Stay focused. Every page counts! 📚

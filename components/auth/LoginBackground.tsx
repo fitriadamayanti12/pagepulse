@@ -2,74 +2,42 @@
 
 import { BookOpen, BookMarked, Library } from 'lucide-react';
 
+const books = [
+  { icon: BookOpen, color: 'text-amber-400/25', position: 'top-20 left-[8%]', rotate: '-8deg', duration: '6s', delay: '0s', size: 'w-5 h-5' },
+  { icon: BookMarked, color: 'text-rose-400/20', position: 'top-40 right-[6%]', rotate: '6deg', duration: '7s', delay: '0.5s', size: 'w-4 h-4' },
+  { icon: Library, color: 'text-violet-400/20', position: 'bottom-32 left-[5%]', rotate: '-5deg', duration: '8s', delay: '1s', size: 'w-5 h-5' },
+  { icon: BookOpen, color: 'text-sky-400/20', position: 'bottom-40 right-[8%]', rotate: '10deg', duration: '6.5s', delay: '1.5s', size: 'w-4 h-4' },
+];
+
 export default function LoginBackground() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
       {/* Gradient Orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-br from-amber-100/40 via-orange-100/25 to-yellow-100/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[400px] bg-gradient-to-tr from-amber-100/30 to-transparent rounded-full blur-3xl" />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-orange-100/25 to-transparent rounded-full blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-r from-rose-100/15 to-amber-100/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-br from-amber-100/30 via-orange-100/20 to-yellow-100/15 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[400px] bg-gradient-to-tr from-amber-100/20 to-transparent rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-orange-100/15 to-transparent rounded-full blur-3xl" />
 
-      {/* Floating Book 1 - Top Left */}
-      <div 
-        className="absolute animate-float"
-        style={{ top: '15%', left: '10%', animationDuration: '6s', animationDelay: '0s' }}
-      >
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2.5 shadow-md border border-white/60 rotate-[-8deg]">
-          <BookOpen className="w-5 h-5 text-amber-400/30" />
-        </div>
-      </div>
-
-      {/* Floating Book 2 - Top Right */}
-      <div 
-        className="absolute animate-float"
-        style={{ top: '25%', right: '8%', animationDuration: '7s', animationDelay: '0.5s' }}
-      >
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2.5 shadow-md border border-white/60 rotate-[6deg]">
-          <BookMarked className="w-4 h-4 text-orange-400/30" />
-        </div>
-      </div>
-
-      {/* Floating Book 3 - Bottom Left */}
-      <div 
-        className="absolute animate-float"
-        style={{ bottom: '25%', left: '6%', animationDuration: '8s', animationDelay: '1s' }}
-      >
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2.5 shadow-md border border-white/60 rotate-[-5deg]">
-          <Library className="w-5 h-5 text-amber-500/25" />
-        </div>
-      </div>
-
-      {/* Floating Book 4 - Bottom Right */}
-      <div 
-        className="absolute animate-float"
-        style={{ bottom: '20%', right: '10%', animationDuration: '6.5s', animationDelay: '1.5s' }}
-      >
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2.5 shadow-md border border-white/60 rotate-[10deg]">
-          <BookOpen className="w-4 h-4 text-yellow-400/25" />
-        </div>
-      </div>
-
-      {/* Floating Book 5 - Middle Left */}
-      <div 
-        className="absolute animate-float"
-        style={{ top: '50%', left: '4%', animationDuration: '7.5s', animationDelay: '2s' }}
-      >
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2 shadow-md border border-white/60 rotate-[-3deg]">
-          <BookMarked className="w-4 h-4 text-amber-300/25" />
-        </div>
-      </div>
-
-      {/* Floating Book 6 - Middle Right */}
-      <div 
-        className="absolute animate-float"
-        style={{ top: '60%', right: '5%', animationDuration: '9s', animationDelay: '2.5s' }}
-      >
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl p-2.5 shadow-md border border-white/60 rotate-[4deg]">
-          <BookOpen className="w-5 h-5 text-orange-300/25" />
-        </div>
-      </div>
+      {/* Floating Books */}
+      {books.map((book, i) => {
+        const Icon = book.icon;
+        return (
+          <div key={i} className="absolute animate-float" style={{
+            top: book.position.split(' ')[0] === 'top-20' ? '20%' : 
+                 book.position.split(' ')[0] === 'top-40' ? '40%' : 
+                 book.position.split(' ')[0] === 'bottom-32' ? '68%' : '60%',
+            left: book.position.includes('left-[8%]') ? '8%' :
+                  book.position.includes('right-[6%]') ? '94%' :
+                  book.position.includes('left-[5%]') ? '5%' : '92%',
+            animationDuration: book.duration,
+            animationDelay: book.delay,
+          }}>
+            <div className="bg-white/30 backdrop-blur-sm rounded-xl p-2.5 shadow-md border border-white/40"
+              style={{ transform: `rotate(${book.rotate})` }}>
+              <Icon className={`${book.size} ${book.color}`} />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

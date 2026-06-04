@@ -10,9 +10,10 @@ interface SessionCompleteProps {
   onPagesChange: (v: string) => void;
   onBookTitleChange: (v: string) => void;
   onSave: () => void;
+  saving?: boolean;
 }
 
-export default function SessionComplete({ pages, bookTitle, onPagesChange, onBookTitleChange, onSave }: SessionCompleteProps) {
+export default function SessionComplete({ pages, bookTitle, onPagesChange, onBookTitleChange, onSave, saving }: SessionCompleteProps) {
   return (
     <div className="bg-gradient-to-r from-emerald-50/80 to-teal-50/80 backdrop-blur-xl rounded-3xl p-6 sm:p-7 border-2 border-emerald-200/50 shadow-2xl animate-in fade-in slide-in-from-bottom-4 w-full max-w-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 mb-5">
@@ -34,11 +35,21 @@ export default function SessionComplete({ pages, bookTitle, onPagesChange, onBoo
         {/* Save Button - Desktop: di kanan */}
         <Button 
           onClick={onSave}
-          className="sm:ml-auto h-12 sm:h-14 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white shadow-xl shadow-emerald-200/40 text-base sm:text-lg font-extrabold rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 px-6 flex-shrink-0"
+          disabled={saving}
+          className="sm:ml-auto h-12 sm:h-14 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white shadow-xl shadow-emerald-200/40 text-base sm:text-lg font-extrabold rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 px-6 flex-shrink-0 disabled:opacity-70"
         >
-          <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
-          Save Session
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          {saving ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
+              Save Session
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+            </>
+          )}
         </Button>
       </div>
 

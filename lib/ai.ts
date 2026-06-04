@@ -1,44 +1,58 @@
 // lib/ai.ts
-// Claude API helper untuk PagePulse
+// DeepSeek AI - GRATIS, kualitas setara GPT-4
 
-const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
-const CLAUDE_API_KEY = process.env.NEXT_PUBLIC_CLAUDE_API_KEY || '';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
 
-interface ClaudeMessage {
-  role: 'user' | 'assistant';
+interface DeepSeekMessage {
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
-export async function callClaude(
-  systemPrompt: string,
-  messages: ClaudeMessage[],
+export async function callDeepSeek(
+  messages: DeepSeekMessage[],
   maxTokens: number = 1024
 ): Promise<string> {
+  if (!DEEPSEEK_API_KEY) {
+    throw new Error('DEEPSEEK_API_KEY is not set. Please add it to .env.local');
+  }
+
   try {
-    const response = await fetch(CLAUDE_API_URL, {
+    const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: maxTokens,
-        system: systemPrompt,
+        model: 'deepseek-chat',
         messages: messages,
+        max_tokens: maxTokens,
+        temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Claude API error');
+      const errorText = await response.text();
+      console.error('DeepSeek API Response:', response.status, errorText);
+      
+      if (response.status === 429) {
+        throw new Error('DeepSeek rate limit reached. Please try again later.');
+      }
+      if (response.status === 401) {
+        throw new Error('Invalid DeepSeek API key. Please check your DEEPSEEK_API_KEY.');
+      }
+      if (response.status === 402) {
+        throw new Error('DeepSeek credits exhausted. Please top up or wait for renewal.');
+      }
+      
+      throw new Error(`DeepSeek API error (${response.status}): ${errorText}`);
     }
 
     const data = await response.json();
-    return data.content[0].text;
-  } catch (error) {
-    console.error('Claude API Error:', error);
+    return data.choices[0].message.content;
+  } catch (error: any) {
+    console.error('DeepSeek API Error:', error.message);
     throw error;
   }
 }
@@ -51,85 +65,51 @@ interface ReadingHistory {
   book_title: string;
   book_author?: string;
   rating?: number;
-  duration_seconds?: number;
-  pages_read?: number;
 }
 
 // 1. AI Book Recommendations
 export async function getAIRecommendations(readingHistory: ReadingHistory[]): Promise<string> {
-  const systemPrompt = `You are a literary expert and book recommendation specialist. 
-Based on the user's reading history, provide 3-5 personalized book recommendations.
-For each recommendation, include:
-- Book title and author
-- Why they might like it (based on their history)
-- A brief description
-- Genre
-Format your response in a friendly, encouraging tone. Keep it concise.`;
-
   const historySummary = readingHistory
     .map(h => `- "${h.book_title}"${h.book_author ? ` by ${h.book_author}` : ''}${h.rating ? ` (rated ${h.rating}/5)` : ''}`)
     .join('\n');
 
-  const messages: ClaudeMessage[] = [
-    { role: 'user', content: `Here's my reading history:\n${historySummary}\n\nWhat books would you recommend for me?` }
+  const messages: DeepSeekMessage[] = [
+    { role: 'system', content: 'You are a literary expert. Provide 3-5 personalized book recommendations based on reading history. Include: title, author, why they might like it, brief description, genre. Be friendly and concise.' },
+    { role: 'user', content: `Here's my reading history:\n${historySummary}\n\nWhat books would you recommend?` }
   ];
 
-  return callClaude(systemPrompt, messages, 800);
+  return callDeepSeek(messages, 800);
 }
 
 // 2. AI Reading Summary
 export async function getAIReadingSummary(bookTitle: string, pages: number, minutes: number): Promise<string> {
-  const systemPrompt = `You are a motivational reading coach. 
-Provide a short, encouraging summary of the user's reading session.
-Include:
-- Positive reinforcement
-- A fun fact about reading
-- A motivational quote about books
-Keep it under 150 words and make it personal.`;
-
-  const messages: ClaudeMessage[] = [
-    { role: 'user', content: `I just finished a reading session: "${bookTitle}", read ${pages} pages in ${minutes} minutes. Give me a motivational summary!` }
+  const messages: DeepSeekMessage[] = [
+    { role: 'system', content: 'You are a motivational reading coach. Provide a short, encouraging summary of a reading session. Include positive reinforcement and a motivational quote. Keep it under 150 words.' },
+    { role: 'user', content: `I just read "${bookTitle}", ${pages} pages in ${minutes} minutes. Give me a motivational summary!` }
   ];
 
-  return callClaude(systemPrompt, messages, 300);
+  return callDeepSeek(messages, 300);
 }
 
 // 3. AI Discussion Starter
 export async function getAIDiscussionStarter(bookTitle: string): Promise<string> {
-  const systemPrompt = `You are a book club discussion leader. 
-Generate 3 thought-provoking discussion questions about a specific book.
-Make questions open-ended and engaging. Keep it concise.`;
-
-  const messages: ClaudeMessage[] = [
-    { role: 'user', content: `Generate 3 discussion questions for the book: "${bookTitle}"` }
+  const messages: DeepSeekMessage[] = [
+    { role: 'system', content: 'You are a book club leader. Generate 3 thought-provoking discussion questions about a specific book.' },
+    { role: 'user', content: `Generate 3 discussion questions for: "${bookTitle}"` }
   ];
 
-  return callClaude(systemPrompt, messages, 500);
+  return callDeepSeek(messages, 500);
 }
 
 // 4. AI Goal Suggestions
-export async function getAIGoalSuggestions(
-  recentMinutes: number[],
-  recentPages: number[]
-): Promise<string> {
-  const systemPrompt = `You are a reading habit coach.
-Based on the user's recent reading data, suggest realistic monthly goals.
-Include:
-- Recommended minutes per day
-- Recommended pages per month
-- Tips to achieve the goals
-Be encouraging and specific. Keep it under 200 words.`;
+export async function getAIGoalSuggestions(recentMinutes: number[], recentPages: number[]): Promise<string> {
+  const avgMinutes = recentMinutes.length > 0 ? Math.round(recentMinutes.reduce((a, b) => a + b, 0) / recentMinutes.length) : 0;
+  const avgPages = recentPages.length > 0 ? Math.round(recentPages.reduce((a, b) => a + b, 0) / recentPages.length) : 0;
 
-  const avgMinutes = recentMinutes.length > 0 
-    ? Math.round(recentMinutes.reduce((a, b) => a + b, 0) / recentMinutes.length) 
-    : 0;
-  const avgPages = recentPages.length > 0 
-    ? Math.round(recentPages.reduce((a, b) => a + b, 0) / recentPages.length) 
-    : 0;
-
-  const messages: ClaudeMessage[] = [
-    { role: 'user', content: `My recent reading: average ${avgMinutes} minutes/day, ${avgPages} pages/day. What monthly goals should I set?` }
+  const messages: DeepSeekMessage[] = [
+    { role: 'system', content: 'You are a reading habit coach. Suggest realistic monthly goals based on recent data. Include recommended minutes/day, pages/month, and tips. Be encouraging and specific.' },
+    { role: 'user', content: `My recent averages: ${avgMinutes} min/day, ${avgPages} pages/day. What monthly goals should I set?` }
   ];
 
-  return callClaude(systemPrompt, messages, 500);
+  return callDeepSeek(messages, 500);
 }

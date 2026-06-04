@@ -36,23 +36,23 @@ export async function proxy(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  const protectedPaths = ['/dashboard', '/goals', '/history', '/stats', '/achievements', '/reviews', '/discussion'];
+  // Protected paths - perlu login
+  const protectedPaths = [
+    '/dashboard', '/timer', '/goals', '/history', '/stats', 
+    '/achievements', '/reviews', '/discussion', '/profile'
+  ];
   const isProtected = protectedPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
+  // Kalau akses halaman protected tanpa login → redirect ke login
   if (isProtected && !session) {
     const redirectUrl = new URL('/login', req.url);
     redirectUrl.searchParams.set('redirect', req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (session && req.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
+  // SEMUA REDIRECT LAIN DIHAPUS!
+  // User bisa akses /login, /signup, / kapan saja
+  
   return response;
 }
 

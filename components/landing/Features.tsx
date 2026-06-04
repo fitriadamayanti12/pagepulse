@@ -1,6 +1,7 @@
 'use client';
 
-import { Clock, Target, BarChart3, Users, Award, ArrowRight, Quote } from 'lucide-react';
+import { Clock, Target, BarChart3, Users, Award, ArrowRight, Quote, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const features = [
   { 
@@ -10,6 +11,8 @@ const features = [
     gradient: 'from-amber-400 to-orange-500', 
     shadow: 'shadow-amber-200/30',
     iconColor: 'text-white',
+    emoji: '⏱️',
+    bgHover: 'hover:bg-amber-50/50',
   },
   { 
     icon: Target, 
@@ -18,6 +21,8 @@ const features = [
     gradient: 'from-rose-400 to-pink-500', 
     shadow: 'shadow-rose-200/30',
     iconColor: 'text-white',
+    emoji: '🎯',
+    bgHover: 'hover:bg-rose-50/50',
   },
   { 
     icon: BarChart3, 
@@ -26,6 +31,8 @@ const features = [
     gradient: 'from-violet-400 to-purple-500', 
     shadow: 'shadow-violet-200/30',
     iconColor: 'text-white',
+    emoji: '📊',
+    bgHover: 'hover:bg-violet-50/50',
   },
   { 
     icon: Quote, 
@@ -34,6 +41,8 @@ const features = [
     gradient: 'from-sky-400 to-blue-500', 
     shadow: 'shadow-sky-200/30',
     iconColor: 'text-white',
+    emoji: '💬',
+    bgHover: 'hover:bg-sky-50/50',
   },
   { 
     icon: Users, 
@@ -42,6 +51,8 @@ const features = [
     gradient: 'from-emerald-400 to-teal-500', 
     shadow: 'shadow-emerald-200/30',
     iconColor: 'text-white',
+    emoji: '👥',
+    bgHover: 'hover:bg-emerald-50/50',
   },
   { 
     icon: Award, 
@@ -50,48 +61,132 @@ const features = [
     gradient: 'from-fuchsia-400 to-purple-500', 
     shadow: 'shadow-fuchsia-200/30',
     iconColor: 'text-white',
+    emoji: '🏆',
+    bgHover: 'hover:bg-fuchsia-50/50',
   },
 ];
 
+// Sparkles dengan posisi FIXED (tanpa Math.random)
+const sparkles = [
+  { top: '12%', left: '8%', width: '14px', height: '14px', delay: '0s', duration: '5s' },
+  { top: '28%', left: '82%', width: '12px', height: '12px', delay: '0.8s', duration: '6s' },
+  { top: '45%', left: '22%', width: '16px', height: '16px', delay: '1.6s', duration: '7s' },
+  { top: '62%', left: '75%', width: '11px', height: '11px', delay: '2.4s', duration: '5s' },
+  { top: '78%', left: '48%', width: '13px', height: '13px', delay: '3.2s', duration: '6s' },
+];
+
 export default function Features() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="features" className="py-20 lg:py-24">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-sm font-bold text-amber-600 uppercase tracking-widest bg-amber-100/80 backdrop-blur-sm border border-amber-200 px-4 py-1.5 rounded-full">
+    <section ref={sectionRef} id="features" className="py-20 lg:py-28 relative overflow-hidden">
+      {/* Background sparkles - FIXED POSITIONS */}
+      <div className="absolute inset-0 pointer-events-none">
+        {sparkles.map((s, i) => (
+          <Sparkles
+            key={i}
+            className="absolute text-amber-300/20 animate-float"
+            style={{
+              top: s.top,
+              left: s.left,
+              width: s.width,
+              height: s.height,
+              animationDelay: s.delay,
+              animationDuration: s.duration,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 relative">
+        {/* Section Header */}
+        <div className={`text-center mb-16 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <span className="text-sm font-bold text-amber-600 uppercase tracking-widest bg-amber-100/80 backdrop-blur-sm border-2 border-amber-200/60 px-5 py-2 rounded-full inline-flex items-center gap-2 animate-bounce-gentle">
+            <Sparkles className="w-4 h-4" />
             Features
           </span>
-          <h2 className="text-4xl lg:text-5xl font-extrabold text-slate-900 mt-5 mb-4">Everything you need</h2>
-          <p className="text-lg text-slate-500 max-w-lg mx-auto font-semibold">Purrfect tools for your reading journey.</p>
+          <h2 className="text-4xl lg:text-5xl font-extrabold text-[#3d3530] mt-5 mb-4">
+            Everything you need
+          </h2>
+          <p className="text-lg text-[#9b8d80] max-w-lg mx-auto font-bold">
+            Purrfect tools for your reading journey.
+          </p>
         </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((f, i) => (
             <div
               key={i}
-              className={`group bg-white/50 backdrop-blur-xl border-2 border-white/80 rounded-2xl p-7 hover:shadow-2xl ${f.shadow} hover:border-amber-300 hover:bg-white/80 hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden`}
+              className={`group bg-white/50 backdrop-blur-xl border-2 rounded-2xl p-7 transition-all duration-500 relative overflow-hidden ${
+                hoveredCard === i 
+                  ? `border-amber-300/80 shadow-2xl -translate-y-2 scale-[1.03] ${f.bgHover}`
+                  : isVisible 
+                    ? `border-white/80 shadow-md hover:shadow-xl hover:-translate-y-1.5 ${f.shadow}`
+                    : 'border-white/80 shadow-sm opacity-0 translate-y-12'
+              }`}
+              style={{ transitionDelay: isVisible ? `${i * 100}ms` : '0ms' }}
+              onMouseEnter={() => setHoveredCard(i)}
+              onMouseLeave={() => setHoveredCard(null)}
             >
-              {/* Hover sparkle effect */}
+              {/* Top shine line */}
+              <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Hover sparkle burst */}
               <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute top-3 right-3 w-2 h-2 bg-white rounded-full animate-sparkle-burst shadow-lg" />
-                <div className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-white rounded-full animate-sparkle-burst shadow-lg" style={{ animationDelay: '0.3s' }} />
-                <div className="absolute top-1/2 right-5 w-1 h-1 bg-white rounded-full animate-sparkle-burst shadow-lg" style={{ animationDelay: '0.6s' }} />
+                <div className="absolute top-3 right-3 w-2 h-2 bg-amber-300/60 rounded-full animate-sparkle-burst shadow-lg" />
+                <div className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-rose-300/60 rounded-full animate-sparkle-burst shadow-lg" style={{ animationDelay: '0.3s' }} />
+                <div className="absolute top-1/2 right-5 w-1 h-1 bg-violet-300/60 rounded-full animate-sparkle-burst shadow-lg" style={{ animationDelay: '0.6s' }} />
+                <div className="absolute bottom-2 right-3 w-1.5 h-1.5 bg-sky-300/60 rounded-full animate-sparkle-burst shadow-lg" style={{ animationDelay: '0.9s' }} />
               </div>
 
-              {/* Icon Box - PUTIH ICON */}
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-5 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                <f.icon className={`w-7 h-7 ${f.iconColor} drop-shadow-md`} />
+              {/* Icon Box */}
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-5 shadow-xl transition-all duration-500 ${
+                hoveredCard === i ? 'scale-110 rotate-6 shadow-2xl' : 'group-hover:scale-110 group-hover:rotate-3'
+              }`}>
+                <f.icon className={`w-7 h-7 ${f.iconColor} drop-shadow-md transition-transform duration-300 ${
+                  hoveredCard === i ? 'scale-110' : ''
+                }`} />
               </div>
 
-              {/* Title - BOLD & DARK */}
-              <h3 className="text-lg font-extrabold text-slate-900 mb-2">{f.title}</h3>
+              {/* Title */}
+              <h3 className={`text-lg font-extrabold mb-2 transition-colors duration-300 ${
+                hoveredCard === i ? 'text-amber-700' : 'text-[#3d3530]'
+              }`}>
+                {f.title}
+              </h3>
               
               {/* Description */}
-              <p className="text-sm text-slate-500 leading-relaxed font-semibold">{f.description}</p>
+              <p className="text-sm text-[#9b8d80] leading-relaxed font-semibold">{f.description}</p>
               
-              {/* Learn more - BOLD */}
-              <div className="mt-5 flex items-center gap-2 text-amber-600 text-sm font-extrabold opacity-0 group-hover:opacity-100 transition-all duration-300">
+              {/* Learn more */}
+              <div className={`mt-5 flex items-center gap-2 text-amber-600 text-sm font-extrabold transition-all duration-300 ${
+                hoveredCard === i ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+              }`}>
                 <span>Learn more</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${hoveredCard === i ? 'translate-x-1' : ''}`} />
+              </div>
+
+              {/* Emoji popup */}
+              <div className={`absolute -top-2 -right-2 text-xl transition-all duration-300 ${
+                hoveredCard === i ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-0 rotate-180'
+              }`}>
+                {f.emoji}
               </div>
             </div>
           ))}

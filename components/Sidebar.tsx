@@ -6,19 +6,19 @@ import { useState } from 'react';
 import { 
   LayoutDashboard, Target, BookOpen, Award, BarChart3,
   MessageSquare, MessageCircle, X, Menu, Sparkles, BookMarked,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, User
 } from 'lucide-react';
 
 const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, activeGradient: 'from-amber-400 to-orange-500', activeBar: 'from-amber-400 to-orange-500', activeText: 'text-amber-700', activeBg: 'bg-amber-50/80' },
   { href: '/timer', label: 'Reading Timer', icon: BookMarked, activeGradient: 'from-rose-400 to-pink-500', activeBar: 'from-rose-400 to-pink-500', activeText: 'text-rose-700', activeBg: 'bg-rose-50/80' },
-  { href: '/goals', label: 'Monthly Goals', icon: Target, activeGradient: 'from-violet-400 to-purple-500', activeBar: 'from-violet-400 to-purple-500', activeText: 'text-violet-700', activeBg: 'bg-violet-50/80' },
+  { href: '/goals', label: 'Goals', icon: Target, activeGradient: 'from-violet-400 to-purple-500', activeBar: 'from-violet-400 to-purple-500', activeText: 'text-violet-700', activeBg: 'bg-violet-50/80' },
   { href: '/history', label: 'History', icon: BookOpen, activeGradient: 'from-emerald-400 to-teal-500', activeBar: 'from-emerald-400 to-teal-500', activeText: 'text-emerald-700', activeBg: 'bg-emerald-50/80' },
   { href: '/stats', label: 'Statistics', icon: BarChart3, activeGradient: 'from-sky-400 to-blue-500', activeBar: 'from-sky-400 to-blue-500', activeText: 'text-sky-700', activeBg: 'bg-sky-50/80' },
-  // { href: '/ai', label: 'AI Grok', icon: Brain, activeGradient: 'from-violet-400 to-purple-500', activeBar: 'from-violet-400 to-purple-500', activeText: 'text-violet-700', activeBg: 'bg-violet-50/80' },
   { href: '/achievements', label: 'Achievements', icon: Award, activeGradient: 'from-amber-400 to-yellow-500', activeBar: 'from-amber-400 to-yellow-500', activeText: 'text-amber-700', activeBg: 'bg-amber-50/80' },
   { href: '/reviews', label: 'Reviews', icon: MessageSquare, activeGradient: 'from-fuchsia-400 to-purple-500', activeBar: 'from-fuchsia-400 to-purple-500', activeText: 'text-fuchsia-700', activeBg: 'bg-fuchsia-50/80' },
   { href: '/discussion', label: 'Discussion', icon: MessageCircle, activeGradient: 'from-cyan-400 to-teal-500', activeBar: 'from-cyan-400 to-teal-500', activeText: 'text-cyan-700', activeBg: 'bg-cyan-50/80' },
+  //{ href: '/profile', label: 'Profile', icon: User, activeGradient: 'from-teal-400 to-emerald-500', activeBar: 'from-teal-400 to-emerald-500', activeText: 'text-teal-700', activeBg: 'bg-teal-50/80' },
 ];
 
 interface SidebarProps {
@@ -74,7 +74,6 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-          const isAI = item.href === '/ai';
           
           return (
             <Link
@@ -84,9 +83,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
               className={`group relative flex items-center gap-3.5 px-3 py-2.5 rounded-xl transition-all duration-300 ${
                 isActive 
                   ? `${item.activeBg} backdrop-blur-xl shadow-md border border-white/80` 
-                  : isAI && !isActive
-                    ? 'bg-gradient-to-r from-violet-50/40 to-purple-50/40 border border-violet-100/30 hover:border-violet-200/50'
-                    : 'text-[#6b5d50] hover:bg-white/40 border border-transparent hover:border-amber-100/40'
+                  : 'text-[#6b5d50] hover:bg-white/40 border border-transparent hover:border-amber-100/40'
               } ${isCollapsed ? 'justify-center px-2' : ''}`}
               title={isCollapsed ? item.label : ''}
             >
@@ -95,29 +92,19 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
                 isActive 
                   ? `bg-gradient-to-br ${item.activeGradient} shadow-md` 
-                  : isAI && !isActive
-                    ? 'bg-gradient-to-br from-violet-100/60 to-purple-100/60 border border-violet-200/40'
-                    : 'bg-amber-50/50 group-hover:bg-amber-100/50'
+                  : 'bg-amber-50/50 group-hover:bg-amber-100/50'
               }`}>
                 <Icon className={`w-5 h-5 transition-colors ${
-                  isActive ? 'text-white' 
-                  : isAI && !isActive ? 'text-violet-500' 
-                  : 'text-[#9b8d80] group-hover:text-[#6b5d50]'
+                  isActive ? 'text-white' : 'text-[#9b8d80] group-hover:text-[#6b5d50]'
                 }`} />
               </div>
               
               {!isCollapsed && (
                 <span className={`text-[15px] font-bold transition-colors truncate ${
-                  isActive ? item.activeText 
-                  : isAI && !isActive ? 'text-violet-600' 
-                  : 'text-[#6b5d50] group-hover:text-[#3d3530]'
+                  isActive ? item.activeText : 'text-[#6b5d50] group-hover:text-[#3d3530]'
                 }`}>
                   {item.label}
                 </span>
-              )}
-              
-              {isAI && !isActive && !isCollapsed && (
-                <span className="px-2 py-0.5 bg-gradient-to-r from-violet-400 to-purple-500 text-white text-[10px] font-extrabold rounded-full flex-shrink-0 ml-auto">GROK</span>
               )}
               
               {isActive && !isCollapsed && <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 ml-auto animate-twinkle" />}
@@ -138,7 +125,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
       {isMobileOpen && <div className="fixed inset-0 bg-[#3d3530]/30 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileOpen(false)} />}
 
-      {/* Sidebar Desktop - 248px */}
+      {/* Sidebar Desktop */}
       <aside className={`hidden lg:flex flex-col fixed top-0 left-0 h-full bg-white/40 backdrop-blur-2xl border-r border-white/60 shadow-2xl shadow-amber-100/10 z-40 transition-all duration-300 ${isCollapsed ? 'w-[88px]' : 'w-68'}`}>
         {sidebarContent}
       </aside>

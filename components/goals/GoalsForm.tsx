@@ -2,29 +2,56 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Clock, BookOpen, Save } from 'lucide-react';
+import { Clock, BookOpen, Save, Trash2 } from 'lucide-react';
 
 interface GoalsFormProps {
   targetMinutes: string;
   targetPages: string;
   saving: boolean;
+  hasGoal: boolean;
   onMinutesChange: (v: string) => void;
   onPagesChange: (v: string) => void;
   onSave: () => void;
+  onDelete: () => void;
+  deleting: boolean;
   formatMinutesShort: (m: number) => string;
 }
 
-export default function GoalsForm({ targetMinutes, targetPages, saving, onMinutesChange, onPagesChange, onSave, formatMinutesShort }: GoalsFormProps) {
+export default function GoalsForm({ 
+  targetMinutes, targetPages, saving, hasGoal,
+  onMinutesChange, onPagesChange, onSave, onDelete, deleting, formatMinutesShort 
+}: GoalsFormProps) {
   return (
     <div className="bg-white/60 backdrop-blur-xl rounded-3xl border-2 border-amber-100/40 shadow-lg p-7 sm:p-8">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="w-12 h-12 bg-amber-100/60 rounded-2xl flex items-center justify-center border border-amber-200/40">
-          <Clock className="w-6 h-6 text-amber-600" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-amber-100/60 rounded-2xl flex items-center justify-center border border-amber-200/40">
+            <Clock className="w-6 h-6 text-amber-600" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-[#3d3530]">
+            {hasGoal ? 'Edit Goals' : 'Set Your Goals'}
+          </h2>
         </div>
-        <h2 className="text-2xl font-extrabold text-[#3d3530]">Set Your Goals</h2>
+        
+        {/* Delete Button */}
+        {hasGoal && (
+          <button
+            onClick={onDelete}
+            disabled={deleting}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50/60 rounded-xl transition-all border border-rose-200/40 disabled:opacity-50"
+          >
+            {deleting ? (
+              <div className="w-4 h-4 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+            Delete
+          </button>
+        )}
       </div>
       
       <div className="space-y-5">
+        {/* Time Target */}
         <div>
           <label className="block text-base font-bold text-[#3d3530] mb-2">
             <span className="flex items-center gap-2">
@@ -45,6 +72,7 @@ export default function GoalsForm({ targetMinutes, targetPages, saving, onMinute
           </div>
         </div>
 
+        {/* Pages Target */}
         <div>
           <label className="block text-base font-bold text-[#3d3530] mb-2">
             <span className="flex items-center gap-2">
@@ -65,6 +93,7 @@ export default function GoalsForm({ targetMinutes, targetPages, saving, onMinute
           </div>
         </div>
 
+        {/* Save Button */}
         <Button onClick={onSave} disabled={saving}
           className="w-full h-14 text-lg font-extrabold bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-xl shadow-amber-200/30 rounded-2xl transition-all duration-300">
           {saving ? (
@@ -75,7 +104,7 @@ export default function GoalsForm({ targetMinutes, targetPages, saving, onMinute
           ) : (
             <div className="flex items-center justify-center gap-2">
               <Save className="w-5 h-5" />
-              Save Goals
+              {hasGoal ? 'Update Goals' : 'Save Goals'}
             </div>
           )}
         </Button>

@@ -4,9 +4,20 @@ import { Button } from '@/components/ui/button';
 
 interface GoalsHeaderProps {
   monthName: string;
+  goalType?: string;
 }
 
-export default function GoalsHeader({ monthName }: GoalsHeaderProps) {
+export default function GoalsHeader({ monthName, goalType = 'monthly' }: GoalsHeaderProps) {
+  const getTitle = () => {
+    switch (goalType) {
+      case 'daily': return 'Daily Goal';
+      case 'weekly': return 'Weekly Goal';
+      case 'monthly': return 'Monthly Goals';
+      case 'yearly': return 'Yearly Goal';
+      default: return 'Monthly Goals';
+    }
+  };
+
   return (
     <div className="mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -16,10 +27,10 @@ export default function GoalsHeader({ monthName }: GoalsHeaderProps) {
           </div>
           <div>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#3d3530] tracking-tight">
-              Monthly Goals
+              {getTitle()}
             </h1>
             <p className="text-lg sm:text-xl text-[#9b8d80] mt-1 font-semibold">
-              Set and track your reading targets
+              {monthName}
             </p>
           </div>
         </div>
