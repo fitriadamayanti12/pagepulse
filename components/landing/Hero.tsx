@@ -9,10 +9,10 @@ import CatIcon from './CatIcon';
 const typingWords = ['Every Page', 'Every Chapter', 'Every Story'];
 
 const stats = [
-  { value: '10K+', label: 'Happy Readers', icon: Heart },
-  { value: '50K+', label: 'Books Tracked', icon: Library },
-  { value: '1M+', label: 'Hours Read', icon: Clock },
-  { value: '4.9', label: 'Rating', icon: Star },
+  { value: '10K+', label: 'Readers Target', icon: Heart },
+  { value: '50K+', label: 'Books to Track', icon: Library },
+  { value: '1M+', label: 'Hours to Read', icon: Clock },
+  { value: '100%', label: 'Free Always', icon: Star },
 ];
 
 export default function Hero() {
@@ -57,9 +57,9 @@ export default function Hero() {
   // Mouse parallax
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ 
-        x: (e.clientX / window.innerWidth - 0.5) * 25, 
-        y: (e.clientY / window.innerHeight - 0.5) * 25 
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 25,
+        y: (e.clientY / window.innerHeight - 0.5) * 25
       });
     };
     window.addEventListener('mousemove', handleMouseMove);
@@ -86,11 +86,11 @@ export default function Hero() {
 
   // Counter animation
   const animateCounters = () => {
-    const targetValues = [10000, 50000, 1000000, 4.9];
+    const targetValues = [10000, 50000, 1000000, 100];
     const duration = 2000;
     const steps = 60;
     const interval = duration / steps;
-    
+
     let step = 0;
     const timer = setInterval(() => {
       step++;
@@ -108,20 +108,20 @@ export default function Hero() {
     if (index === 0) return `${(value / 1000).toFixed(0)}K+`;
     if (index === 1) return `${(value / 1000).toFixed(0)}K+`;
     if (index === 2) return `${(value / 1000000).toFixed(0)}M+`;
-    return value.toFixed(1);
+    return '100%';
   };
 
   return (
     <section ref={sectionRef} className="relative pt-32 lg:pt-44 pb-20 lg:pb-28 overflow-hidden">
       {/* Parallax Background Orbs */}
       <div className="absolute inset-0 -z-10">
-        <div 
+        <div
           className="absolute top-0 left-[15%] w-[500px] h-[500px] bg-gradient-to-br from-amber-200/30 to-orange-200/20 rounded-full blur-3xl transition-transform duration-300"
-          style={{ transform: `translate(${mousePosition.x * 0.4}px, ${mousePosition.y * 0.4}px)` }} 
+          style={{ transform: `translate(${mousePosition.x * 0.4}px, ${mousePosition.y * 0.4}px)` }}
         />
-        <div 
+        <div
           className="absolute bottom-0 right-[10%] w-[500px] h-[500px] bg-gradient-to-tl from-rose-200/25 to-pink-200/15 rounded-full blur-3xl transition-transform duration-300"
-          style={{ transform: `translate(${mousePosition.x * -0.3}px, ${mousePosition.y * -0.3}px)` }} 
+          style={{ transform: `translate(${mousePosition.x * -0.3}px, ${mousePosition.y * -0.3}px)` }}
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-r from-violet-100/15 via-amber-100/20 to-sky-100/10 rounded-full blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(251,191,36,0.03)_1px,transparent_1px)] bg-[size:20px_20px]" />
@@ -129,7 +129,7 @@ export default function Hero() {
 
       <div className="max-w-6xl mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center">
-          
+
           {/* Cat Icon - dengan animasi */}
           <div className={`mb-10 flex justify-center transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
             <CatIcon />
@@ -186,11 +186,10 @@ export default function Hero() {
           {/* Stats - dengan counter animation & staggered fade */}
           <div className={`grid grid-cols-2 lg:grid-cols-4 gap-5 max-w-2xl mx-auto mt-16 pt-12 border-t-2 border-amber-100/60 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             {stats.map((s, i) => (
-              <div 
-                key={i} 
-                className={`text-center group cursor-default transition-all duration-500 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+              <div
+                key={i}
+                className={`text-center group cursor-default transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
                 style={{ transitionDelay: `${600 + i * 100}ms` }}
               >
                 <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-white/70 backdrop-blur-xl border-2 border-white flex items-center justify-center shadow-lg shadow-amber-100/20 group-hover:bg-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -201,7 +200,7 @@ export default function Hero() {
                   {counterStarted ? formatCounter(counters[i], i) : s.value}
                 </p>
                 <p className="text-sm text-slate-500 font-bold mt-1 group-hover:text-amber-600 transition-colors">{s.label}</p>
-                
+
                 {/* Animated underline on hover */}
                 <div className="w-0 group-hover:w-12 h-0.5 bg-amber-400 mx-auto mt-1 rounded-full transition-all duration-300" />
               </div>
