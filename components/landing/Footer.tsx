@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { BookOpen, Heart, Zap, ExternalLink } from 'lucide-react';
+import { BookOpen, Heart, Zap, ExternalLink, Shield, FileText } from 'lucide-react';
 
 export default function Footer() {
   return (
     <footer className="border-t-2 border-amber-100/40 py-8 bg-white/40 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Satu Baris: Logo | Copyright | Links | Powered By */}
+        {/* Satu Baris: Logo | Copyright | Privacy • Terms | Auth Links | Powered By */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
@@ -28,7 +28,29 @@ export default function Footer() {
           {/* Divider */}
           <span className="text-amber-200 hidden sm:block">•</span>
 
-          {/* Links */}
+          {/* 🔑 PRIVACY & TERMS - SEJAJAR */}
+          <div className="flex items-center gap-3 text-[#9b8d80] font-bold">
+            <Link 
+              href="/privacy" 
+              className="flex items-center gap-1.5 hover:text-amber-600 transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Privacy</span>
+            </Link>
+            <span className="text-amber-200">•</span>
+            <Link 
+              href="/terms" 
+              className="flex items-center gap-1.5 hover:text-amber-600 transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Terms</span>
+            </Link>
+          </div>
+
+          {/* Divider */}
+          <span className="text-amber-200 hidden sm:block">•</span>
+
+          {/* Auth Links */}
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-[#9b8d80] hover:text-amber-600 font-bold transition-colors">Sign In</Link>
             <Link href="/signup" className="text-[#9b8d80] hover:text-amber-600 font-bold transition-colors">Sign Up</Link>
@@ -37,7 +59,7 @@ export default function Footer() {
           {/* Divider */}
           <span className="text-amber-200 hidden sm:block">•</span>
 
-          {/* Powered by Next Generation - CLICKABLE */}
+          {/* Powered by Next Generation */}
           <a
             href="https://xgeneration.netlify.app"
             target="_blank"

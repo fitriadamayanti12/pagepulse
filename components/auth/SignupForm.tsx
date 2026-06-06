@@ -24,6 +24,25 @@ export default function SignupForm() {
     setLoading(true);
     setError('');
 
+    // 🔑 VALIDASI: Minimal 8 karakter
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    // 🔑 VALIDASI: Huruf besar, kecil, angka (KUAT)
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      setError('Password must contain uppercase, lowercase & number');
+      setLoading(false);
+      return;
+    }
+
+    // 🔑 VALIDASI: Password cocok
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);

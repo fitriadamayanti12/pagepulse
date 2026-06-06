@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, BookOpen } from 'lucide-react';
+import { Heart, BookOpen, Shield, FileText } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -8,6 +8,7 @@ export default function Footer() {
     <footer className="border-t bg-white/50 backdrop-blur-sm mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Brand */}
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-blue-500" />
             <span className="text-sm text-gray-500">
@@ -15,12 +16,33 @@ export default function Footer() {
             </span>
           </div>
 
+          {/* Privacy & Terms */}
+          <div className="flex items-center gap-4 text-sm text-gray-400">
+            <Link
+              href="/privacy"
+              className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+            >
+              <Shield className="w-3 h-3" />
+              <span>Privacy Policy</span>
+            </Link>
+            <span className="text-gray-300">|</span>
+            <Link
+              href="/terms"
+              className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+            >
+              <FileText className="w-3 h-3" />
+              <span>Terms of Service</span>
+            </Link>
+          </div>
+
+          {/* Made with love */}
           <div className="flex items-center gap-1 text-sm text-gray-400">
             <span>Made with</span>
             <Heart className="w-3 h-3 text-red-500 fill-red-500" />
             <span>for readers</span>
           </div>
 
+          {/* Social Links */}
           <div className="flex gap-4 text-sm text-gray-400">
             <a
               href="https://github.com/fitriadamayanti12"

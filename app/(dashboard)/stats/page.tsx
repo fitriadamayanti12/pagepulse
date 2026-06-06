@@ -9,9 +9,13 @@ import StatsMonthly from '@/components/stats/StatsMonthly';
 import StatsEmpty from '@/components/stats/StatsEmpty';
 import StatsLoading from '@/components/stats/StatsLoading';
 import StatsMotivation from '@/components/stats/StatsMotivation';
+import StatsHeatmap from '@/components/stats/StatsHeatmap';
+import StatsRadialChart from '@/components/stats/StatsRadialChart';
+import StatsBarChart from '@/components/stats/StatsBarChart';
 
 export default function StatsPage() {
   const [loading, setLoading] = useState(true);
+  const [allSessions, setAllSessions] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalSeconds: 0, totalPages: 0, totalSessions: 0, avgMinutesPerSession: 0,
     bestDay: { date: '', seconds: 0 },
@@ -23,6 +27,8 @@ export default function StatsPage() {
     const fetchStats = async () => {
       const { data: sessions } = await supabase.from('reading_sessions').select('*').order('date', { ascending: true });
       if (!sessions || sessions.length === 0) { setLoading(false); return; }
+
+      setAllSessions(sessions);
 
       const totalSeconds = sessions.reduce((sum, s) => sum + (s.duration_seconds || 0), 0);
       const totalPages = sessions.reduce((sum, s) => sum + (s.pages_read || 0), 0);
@@ -60,7 +66,10 @@ export default function StatsPage() {
         m.seconds += s.duration_seconds || 0; m.pages += s.pages_read || 0;
         monthlyMap.set(month, m);
       });
-      const monthlyData = Array.from(monthlyMap.entries()).map(([month, data]) => ({ month, ...data })).sort((a, b) => b.month.localeCompare(a.month)).slice(0, 6);
+      const monthlyData = Array.from(monthlyMap.entries())
+        .map(([month, data]) => ({ month, ...data }))
+        .sort((a, b) => b.month.localeCompare(a.month))
+        .slice(0, 6);
 
       setStats({ totalSeconds, totalPages, totalSessions, avgMinutesPerSession, bestDay, monthlyData, totalBooks, consistency, longestStreak, currentStreak });
       setLoading(false);
@@ -83,9 +92,65 @@ export default function StatsPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <StatsHeader totalSessions={stats.totalSessions} />
-      <StatsCards totalSeconds={stats.totalSeconds} totalPages={stats.totalPages} totalBooks={stats.totalBooks} currentStreak={stats.currentStreak} longestStreak={stats.longestStreak} formatTimeShort={formatTimeShort} />
-      <StatsSecondary avgMinutesPerSession={stats.avgMinutesPerSession} consistency={stats.consistency} bestDaySeconds={stats.bestDay.seconds} bestDayDate={stats.bestDay.date} formatTimeShort={formatTimeShort} formatDate={formatDate} />
-      <StatsMonthly monthlyData={stats.monthlyData} formatTimeShort={formatTimeShort} getMonthName={getMonthName} />
+      <StatsCards 
+        totalSeconds={stats.totalSeconds} 
+        totalPages={stats.totalPages} 
+        totalBooks={stats.totalBooks} 
+        currentStreak={stats.currentStreak} 
+        longestStreak={stats.longestStreak} 
+        formatTimeShort={formatTimeShort} 
+      />
+
+      {/* 🔥 RADIAL CHARTS - Progress Goals */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatsRadialChart 
+          value={stats.totalPages} 
+          max={Math.max(stats.totalPages, 500)} 
+          label="Total Pages" 
+          unit="pages"
+          color="#f59e0b"
+          icon="📄"
+        />
+        <StatsRadialChart 
+          value={Math.round(stats.totalSeconds / 3600)} 
+          max={Math.max(Math.round(stats.totalSeconds / 3600), 30)} 
+          label="Reading Hours" 
+          unit="hours"
+          color="#8b5cf6"
+          icon="⏱️"
+        />
+        <StatsRadialChart 
+          value={stats.totalBooks} 
+          max={Math.max(stats.totalBooks, 10)} 
+          label="Books Read" 
+          unit="books"
+          color="#10b981"
+          icon="📚"
+        />
+      </div>
+
+      {/* 🔥 BAR CHART - Monthly Progress */}
+      <StatsBarChart 
+        monthlyData={stats.monthlyData} 
+        getMonthName={getMonthName} 
+      />
+
+      {/* 🔥 HEATMAP - Reading Activity */}
+      <StatsHeatmap sessions={allSessions} />
+
+      <StatsSecondary 
+        avgMinutesPerSession={stats.avgMinutesPerSession} 
+        consistency={stats.consistency} 
+        bestDaySeconds={stats.bestDay.seconds} 
+        bestDayDate={stats.bestDay.date} 
+        formatTimeShort={formatTimeShort} 
+        formatDate={formatDate} 
+      />
+      <StatsMonthly 
+        monthlyData={stats.monthlyData} 
+        formatTimeShort={formatTimeShort} 
+        getMonthName={getMonthName} 
+      />
       <StatsMotivation consistency={stats.consistency} />
     </div>
   );
