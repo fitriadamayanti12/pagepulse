@@ -3,24 +3,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { BookOpen, Timer, Target, TrendingUp, Users, Sparkles, Zap, Star } from 'lucide-react';
 
-// Node data - nanti bisa diganti dengan fitur PagePulse
 const nodes = [
-  { id: 1, x: 15, y: 20, icon: BookOpen, label: 'Track Books', color: 'from-amber-400 to-orange-500', glow: 'rgba(251,191,36,0.6)' },
-  { id: 2, x: 55, y: 10, icon: Timer, label: 'Reading Timer', color: 'from-rose-400 to-pink-500', glow: 'rgba(244,114,182,0.6)' },
-  { id: 3, x: 75, y: 40, icon: Target, label: 'Set Goals', color: 'from-violet-400 to-purple-500', glow: 'rgba(167,139,250,0.6)' },
-  { id: 4, x: 50, y: 65, icon: TrendingUp, label: 'Stats', color: 'from-sky-400 to-blue-500', glow: 'rgba(96,165,250,0.6)' },
-  { id: 5, x: 20, y: 55, icon: Users, label: 'Community', color: 'from-emerald-400 to-teal-500', glow: 'rgba(52,211,153,0.6)' },
-  { id: 6, x: 40, y: 35, icon: Sparkles, label: 'AI Insights', color: 'from-fuchsia-400 to-purple-500', glow: 'rgba(232,121,249,0.6)' },
+  { id: 1, x: 12, y: 18, icon: BookOpen, label: 'Track Books', color: 'from-amber-400 to-orange-500', glow: 'rgba(251,191,36,0.6)', lineColor: '#f59e0b', available: true },
+  { id: 2, x: 50, y: 8, icon: Timer, label: 'Reading Timer', color: 'from-rose-400 to-pink-500', glow: 'rgba(244,114,182,0.6)', lineColor: '#f472b6', available: true },
+  { id: 3, x: 78, y: 38, icon: Target, label: 'Set Goals', color: 'from-violet-400 to-purple-500', glow: 'rgba(167,139,250,0.6)', lineColor: '#a78bfa', available: true },
+  { id: 4, x: 52, y: 68, icon: TrendingUp, label: 'Stats', color: 'from-sky-400 to-blue-500', glow: 'rgba(96,165,250,0.6)', lineColor: '#60a5fa', available: true },
+  { id: 5, x: 18, y: 58, icon: Users, label: 'Community', color: 'from-emerald-400 to-teal-500', glow: 'rgba(52,211,153,0.6)', lineColor: '#34d399', available: true },
+  { id: 6, x: 40, y: 34, icon: Sparkles, label: 'AI Insights', color: 'from-fuchsia-400 to-purple-500', glow: 'rgba(232,121,249,0.6)', lineColor: '#e879f9', available: false },
 ];
 
-// Garis koneksi antar node
 const connections = [
   [1, 2], [2, 3], [3, 4], [4, 5], [5, 1],
   [1, 6], [2, 6], [3, 6], [4, 6], [5, 6],
   [1, 3], [2, 4], [3, 5],
 ];
 
-// Particle yang berjalan di sepanjang garis
 function MovingParticle({ 
   x1, y1, x2, y2, delay, duration, color 
 }: { 
@@ -29,10 +26,10 @@ function MovingParticle({
 }) {
   return (
     <div
-      className="absolute w-1.5 h-1.5 rounded-full shadow-lg"
+      className="absolute w-2 h-2 rounded-full"
       style={{
         background: color,
-        boxShadow: `0 0 6px ${color}, 0 0 12px ${color}`,
+        boxShadow: `0 0 8px ${color}, 0 0 16px ${color}, 0 0 24px ${color}`,
         animation: `moveAlongLine ${duration}s ${delay}s linear infinite`,
         '--x1': `${x1}%`,
         '--y1': `${y1}%`,
@@ -70,27 +67,27 @@ export default function ConnectionDiagram() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[500px] lg:h-[550px] overflow-hidden rounded-3xl"
+      className="relative w-full h-[520px] lg:h-[580px] overflow-visible rounded-3xl"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setHoveredNode(null)}
     >
       {/* Background grid */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="h-full w-full bg-[linear-gradient(rgba(251,191,36,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(251,191,36,0.5)_1px,transparent_1px)] bg-[size:30px_30px]" />
+      <div className="absolute inset-0 opacity-[0.04]">
+        <div className="h-full w-full bg-[linear-gradient(rgba(251,191,36,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(251,191,36,0.6)_1px,transparent_1px)] bg-[size:32px_32px]" />
       </div>
 
       {/* Cursor glow */}
       <div
-        className="absolute w-[300px] h-[300px] rounded-full blur-3xl pointer-events-none transition-all duration-700 opacity-20"
+        className="absolute w-[350px] h-[350px] rounded-full blur-3xl pointer-events-none transition-all duration-700 opacity-25"
         style={{
           left: `${mousePos.x}%`,
           top: `${mousePos.y}%`,
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(251,191,36,0.5), transparent)',
+          background: 'radial-gradient(circle, rgba(251,191,36,0.6), transparent)',
         }}
       />
 
-      {/* SVG untuk garis koneksi */}
+      {/* SVG garis koneksi */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none">
         <defs>
           {nodes.map((node) => (
@@ -100,7 +97,7 @@ export default function ConnectionDiagram() {
             </radialGradient>
           ))}
           <filter id="line-glow">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feGaussianBlur stdDeviation="2" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -108,7 +105,6 @@ export default function ConnectionDiagram() {
           </filter>
         </defs>
 
-        {/* Garis koneksi */}
         {connections.map(([from, to], i) => {
           const n1 = nodes[from - 1];
           const n2 = nodes[to - 1];
@@ -116,46 +112,56 @@ export default function ConnectionDiagram() {
           
           return (
             <g key={i}>
-              {/* Glow line (di belakang) */}
               <line
                 x1={`${n1.x}%`} y1={`${n1.y}%`}
                 x2={`${n2.x}%`} y2={`${n2.y}%`}
-                stroke={isActive ? 'rgba(251,191,36,0.4)' : 'rgba(251,191,36,0.1)'}
-                strokeWidth={isActive ? 3 : 1}
+                stroke={isActive ? 'rgba(251,191,36,0.5)' : 'rgba(251,191,36,0.15)'}
+                strokeWidth={isActive ? 4 : 1.5}
+                strokeLinecap="round"
                 filter={isActive ? 'url(#line-glow)' : undefined}
                 className="transition-all duration-500"
               />
-              {/* Animated dash */}
               <line
                 x1={`${n1.x}%`} y1={`${n1.y}%`}
                 x2={`${n2.x}%`} y2={`${n2.y}%`}
-                stroke={isActive ? 'rgba(251,191,36,0.8)' : 'rgba(251,191,36,0.3)'}
-                strokeWidth={isActive ? 1.5 : 0.5}
-                strokeDasharray="6 12"
-                className="transition-all duration-500 animate-dash"
+                stroke={isActive ? 'rgba(251,191,36,0.9)' : 'rgba(251,191,36,0.3)'}
+                strokeWidth={isActive ? 2 : 0.8}
+                strokeLinecap="round"
+                className="transition-all duration-500"
               />
+              {isActive && (
+                <line
+                  x1={`${n1.x}%`} y1={`${n1.y}%`}
+                  x2={`${n2.x}%`} y2={`${n2.y}%`}
+                  stroke="rgba(255,255,255,0.8)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeDasharray="4 12"
+                  className="animate-dash"
+                />
+              )}
             </g>
           );
         })}
       </svg>
 
       {/* Moving particles */}
-      {connections.map(([from, to], i) => {
-        const n1 = nodes[from - 1];
-        const n2 = nodes[to - 1];
-        const isActive = hoveredNode === from || hoveredNode === to;
-        if (!isActive) return null;
-        
-        return (
-          <MovingParticle
-            key={i}
-            x1={n1.x} y1={n1.y}
-            x2={n2.x} y2={n2.y}
-            delay={i * 0.3}
-            duration={2 + (i % 3)}
-            color={nodes[hoveredNode! - 1]?.glow || '#fbbf24'}
-          />
-        );
+      {hoveredNode !== null && connections
+        .filter(([from, to]) => from === hoveredNode || to === hoveredNode)
+        .map(([from, to], i) => {
+          const n1 = nodes[from - 1];
+          const n2 = nodes[to - 1];
+          
+          return [...Array(3)].map((_, j) => (
+            <MovingParticle
+              key={`${i}-${j}`}
+              x1={n1.x} y1={n1.y}
+              x2={n2.x} y2={n2.y}
+              delay={j * 0.5}
+              duration={1.5 + j * 0.3}
+              color={nodes[hoveredNode - 1]?.lineColor || '#fbbf24'}
+            />
+          ));
       })}
 
       {/* Nodes */}
@@ -166,6 +172,10 @@ export default function ConnectionDiagram() {
           ([a, b]) => (a === node.id && b === hoveredNode) || (b === node.id && a === hoveredNode)
         );
 
+        // Hitung posisi label biar gak ketimpa
+        const labelOffsetY = node.y > 60 ? -60 : node.y < 20 ? 20 : 30;
+        const labelOffsetX = node.x > 70 ? -10 : node.x < 20 ? 10 : 0;
+
         return (
           <div
             key={node.id}
@@ -175,7 +185,7 @@ export default function ConnectionDiagram() {
               top: `${node.y}%`,
               transform: `translate(-50%, -50%) scale(${isHovered ? 1.3 : isConnected ? 1.1 : 1})`,
               zIndex: isHovered ? 20 : 10,
-              opacity: hoveredNode !== null && !isHovered && !isConnected ? 0.3 : 1,
+              opacity: hoveredNode !== null && !isHovered && !isConnected ? 0.35 : 1,
             }}
             onMouseEnter={() => setHoveredNode(node.id)}
           >
@@ -187,28 +197,45 @@ export default function ConnectionDiagram() {
               style={{ background: node.glow }}
             />
 
+            {/* Pulse ring */}
+            {isHovered && (
+              <div 
+                className="absolute inset-0 rounded-full animate-ping opacity-40"
+                style={{ background: node.glow }}
+              />
+            )}
+
             {/* Node circle */}
             <div
               className={`relative w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br ${node.color} flex items-center justify-center shadow-2xl transition-all duration-500 ${
                 isHovered 
-                  ? 'shadow-[0_0_40px_rgba(251,191,36,0.5)] brightness-125 scale-110' 
-                  : 'shadow-lg shadow-amber-200/20'
+                  ? 'shadow-[0_0_50px_rgba(251,191,36,0.6)] brightness-125 scale-110' 
+                  : 'shadow-lg shadow-amber-200/20 hover:shadow-xl'
               }`}
             >
               <Icon className={`w-6 h-6 lg:w-7 lg:h-7 text-white transition-all duration-300 ${
                 isHovered ? 'scale-110 drop-shadow-lg' : ''
               }`} />
-              
-              {/* Inner shine */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/30 via-transparent to-transparent" />
             </div>
 
-            {/* Label */}
-            <div className={`absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap transition-all duration-500 ${
-              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            }`}>
-              <span className="text-xs lg:text-sm font-extrabold text-[#3d3530] bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full border border-amber-100 shadow-lg">
+            {/* Label - POSISI DINAMIS biar gak ketimpa */}
+            <div 
+              className="absolute whitespace-nowrap transition-all duration-500 pointer-events-none"
+              style={{
+                left: `calc(-50% + ${labelOffsetX}px)`,
+                top: `${labelOffsetY}px`,
+                opacity: isHovered ? 1 : 0,
+                transform: `translateY(${isHovered ? 0 : 4}px)`,
+              }}
+            >
+              <span className="text-xs lg:text-sm font-extrabold text-[#3d3530] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-amber-200 shadow-lg inline-flex items-center gap-1.5">
                 {node.label}
+                {!node.available && (
+                  <span className="text-[10px] bg-gradient-to-r from-fuchsia-400 to-purple-500 text-white px-1.5 py-0.5 rounded-full font-bold animate-pulse">
+                    SOON
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -219,7 +246,7 @@ export default function ConnectionDiagram() {
       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 ${
         isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
       }`}>
-        <div className="bg-white/60 backdrop-blur-2xl border-2 border-amber-200/60 rounded-3xl px-6 py-3 shadow-2xl shadow-amber-100/30">
+        <div className="bg-white/70 backdrop-blur-2xl border-2 border-amber-200/60 rounded-3xl px-6 py-3 shadow-2xl shadow-amber-100/30">
           <div className="flex items-center gap-3">
             <Zap className="w-6 h-6 text-amber-500 animate-pulse" />
             <span className="text-lg font-black text-[#3d3530] tracking-tight">PagePulse</span>
@@ -230,7 +257,7 @@ export default function ConnectionDiagram() {
 
       <style jsx>{`
         @keyframes dash {
-          0% { stroke-dashoffset: 18; }
+          0% { stroke-dashoffset: 16; }
           100% { stroke-dashoffset: 0; }
         }
         @keyframes moveAlongLine {
@@ -238,13 +265,15 @@ export default function ConnectionDiagram() {
             left: var(--x1);
             top: var(--y1);
             opacity: 0;
+            transform: scale(0.5);
           }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
+          15% { opacity: 1; transform: scale(1); }
+          85% { opacity: 1; transform: scale(1); }
           100% {
             left: var(--x2);
             top: var(--y2);
             opacity: 0;
+            transform: scale(0.5);
           }
         }
       `}</style>
