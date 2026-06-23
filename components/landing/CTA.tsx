@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle2, Sparkles, Zap, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-// Particles dengan posisi FIXED
 const particles = [
   { left: '10%', top: '-5%', emoji: '✨', delay: '0s', duration: '4s', size: '16px' },
   { left: '25%', top: '-3%', emoji: '📚', delay: '0.5s', duration: '3.5s', size: '14px' },
@@ -32,6 +31,7 @@ const particles = [
 export default function CTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -52,14 +52,14 @@ export default function CTA() {
       <div className="max-w-3xl mx-auto px-6">
         <div className={`relative bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 rounded-[2.5rem] p-12 lg:p-16 text-center overflow-hidden shadow-2xl shadow-amber-200/30 transition-all duration-1000 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        } animate-glow-pulse`}>
+        }`}>
           
           {/* Glass decorations */}
           <div className="absolute top-0 right-0 w-60 h-60 bg-white/15 backdrop-blur-xl rounded-full blur-2xl animate-float" style={{ animationDuration: '8s' }} />
           <div className="absolute bottom-0 left-0 w-60 h-60 bg-white/10 backdrop-blur-xl rounded-full blur-2xl animate-float-delayed" style={{ animationDuration: '10s' }} />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse" />
 
-          {/* Particle Rain - FIXED POSITIONS */}
+          {/* Particle Rain */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {particles.map((p, i) => (
               <div
@@ -78,7 +78,7 @@ export default function CTA() {
             ))}
           </div>
 
-          {/* Floating particles - 6 orbs */}
+          {/* Floating orbs */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-10 left-10 w-2.5 h-2.5 bg-white/40 rounded-full animate-float" style={{ animationDuration: '3s' }} />
             <div className="absolute top-20 right-20 w-2 h-2 bg-white/30 rounded-full animate-float-delayed" style={{ animationDuration: '4s' }} />
@@ -88,7 +88,7 @@ export default function CTA() {
             <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-float-slow" style={{ animationDuration: '6s', animationDelay: '0.5s' }} />
           </div>
 
-          {/* Twinkle stars */}
+          {/* Stars */}
           <Star className="absolute top-8 right-8 w-5 h-5 text-white/30 animate-twinkle" />
           <Star className="absolute bottom-8 left-8 w-4 h-4 text-white/25 animate-twinkle-delayed" />
           <Star className="absolute top-1/2 right-16 w-3 h-3 text-white/20 animate-twinkle-slow" />
@@ -126,8 +126,19 @@ export default function CTA() {
               Join thousands of readers tracking every page with joy.
             </p>
 
-            {/* CTA Button */}
-            <div className={`transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            {/* CTA Button - with glow on hover */}
+            <div 
+              className={`inline-block transition-all duration-700 delay-500 relative ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+              onMouseEnter={() => setIsButtonHovered(true)}
+              onMouseLeave={() => setIsButtonHovered(false)}
+            >
+              {/* Button glow ring */}
+              <div className={`absolute inset-0 rounded-2xl bg-white blur-xl transition-all duration-500 ${
+                isButtonHovered ? 'opacity-40 scale-110' : 'opacity-0 scale-100'
+              }`} />
+              
               <Link href="/signup">
                 <Button className="relative bg-white hover:bg-slate-50 text-amber-600 shadow-2xl hover:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.2)] h-14 px-10 text-base font-extrabold rounded-2xl group transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white overflow-hidden">
                   <span className="relative z-10 flex items-center gap-2">

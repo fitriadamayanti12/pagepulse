@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, BookMarked, Library, Sparkle } from 'lucide-react';
+import { BookOpen, BookMarked, Library, Sparkles } from 'lucide-react';
 
 const books = [
   { 
@@ -65,7 +65,6 @@ const books = [
   },
 ];
 
-// Sparkles dengan posisi FIXED (tanpa Math.random)
 const sparkles = [
   { top: '12%', left: '8%', width: '10px', height: '10px', delay: '0s', duration: '5s' },
   { top: '25%', left: '85%', width: '12px', height: '12px', delay: '0.7s', duration: '6s' },
@@ -98,15 +97,14 @@ export default function FloatingBooks() {
               }}
             >
               <Icon className={`${book.size} ${book.color} animate-page-flip`} />
-              <Sparkle className="absolute -top-1 -right-1 w-3 h-3 text-amber-400 opacity-0 group-hover:opacity-100 animate-sparkle transition-opacity" />
+              <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-amber-400 opacity-0 group-hover:opacity-100 animate-sparkle transition-opacity" />
             </div>
           </div>
         );
       })}
       
-      {/* Extra floating sparkles - FIXED POSITIONS */}
       {sparkles.map((s, i) => (
-        <Sparkle
+        <Sparkles
           key={`sparkle-${i}`}
           className="absolute text-amber-300/40 animate-float"
           style={{

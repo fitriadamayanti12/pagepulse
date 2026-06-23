@@ -13,6 +13,7 @@ const features = [
     iconColor: 'text-white',
     emoji: '⏱️',
     bgHover: 'hover:bg-amber-50/50',
+    glow: 'rgba(251,191,36,0.3)',
   },
   { 
     icon: Target, 
@@ -23,6 +24,7 @@ const features = [
     iconColor: 'text-white',
     emoji: '🎯',
     bgHover: 'hover:bg-rose-50/50',
+    glow: 'rgba(244,114,182,0.3)',
   },
   { 
     icon: BarChart3, 
@@ -33,6 +35,7 @@ const features = [
     iconColor: 'text-white',
     emoji: '📊',
     bgHover: 'hover:bg-violet-50/50',
+    glow: 'rgba(167,139,250,0.3)',
   },
   { 
     icon: Quote, 
@@ -43,6 +46,7 @@ const features = [
     iconColor: 'text-white',
     emoji: '💬',
     bgHover: 'hover:bg-sky-50/50',
+    glow: 'rgba(96,165,250,0.3)',
   },
   { 
     icon: Users, 
@@ -53,6 +57,7 @@ const features = [
     iconColor: 'text-white',
     emoji: '👥',
     bgHover: 'hover:bg-emerald-50/50',
+    glow: 'rgba(52,211,153,0.3)',
   },
   { 
     icon: Award, 
@@ -63,22 +68,25 @@ const features = [
     iconColor: 'text-white',
     emoji: '🏆',
     bgHover: 'hover:bg-fuchsia-50/50',
+    glow: 'rgba(232,121,249,0.3)',
   },
 ];
 
-// Sparkles dengan posisi FIXED (tanpa Math.random)
 const sparkles = [
   { top: '12%', left: '8%', width: '14px', height: '14px', delay: '0s', duration: '5s' },
   { top: '28%', left: '82%', width: '12px', height: '12px', delay: '0.8s', duration: '6s' },
   { top: '45%', left: '22%', width: '16px', height: '16px', delay: '1.6s', duration: '7s' },
   { top: '62%', left: '75%', width: '11px', height: '11px', delay: '2.4s', duration: '5s' },
   { top: '78%', left: '48%', width: '13px', height: '13px', delay: '3.2s', duration: '6s' },
+  { top: '18%', left: '55%', width: '10px', height: '10px', delay: '1s', duration: '4s' },
+  { top: '70%', left: '15%', width: '15px', height: '15px', delay: '2s', duration: '5.5s' },
 ];
 
 export default function Features() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -94,9 +102,34 @@ export default function Features() {
     return () => observer.disconnect();
   }, []);
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    setMousePos({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    });
+  };
+
   return (
-    <section ref={sectionRef} id="features" className="py-20 lg:py-28 relative overflow-hidden">
-      {/* Background sparkles - FIXED POSITIONS */}
+    <section 
+      ref={sectionRef} 
+      id="features" 
+      className="py-20 lg:py-28 relative overflow-hidden"
+      onMouseMove={handleMouseMove}
+    >
+      {/* Cursor glow */}
+      <div
+        className="absolute w-[400px] h-[400px] rounded-full blur-3xl pointer-events-none transition-all duration-1000 opacity-15"
+        style={{
+          left: `${mousePos.x}%`,
+          top: `${mousePos.y}%`,
+          transform: 'translate(-50%, -50%)',
+          background: 'radial-gradient(circle, rgba(251,191,36,0.6), transparent)',
+        }}
+      />
+
+      {/* Background sparkles */}
       <div className="absolute inset-0 pointer-events-none">
         {sparkles.map((s, i) => (
           <Sparkles
@@ -122,7 +155,10 @@ export default function Features() {
             Features
           </span>
           <h2 className="text-4xl lg:text-5xl font-extrabold text-[#3d3530] mt-5 mb-4">
-            Everything you need
+            Everything you{' '}
+            <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent">
+              need
+            </span>
           </h2>
           <p className="text-lg text-[#9b8d80] max-w-lg mx-auto font-bold">
             Purrfect tools for your reading journey.
@@ -144,8 +180,18 @@ export default function Features() {
               onMouseEnter={() => setHoveredCard(i)}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              {/* Top shine line */}
+              {/* Top shine */}
               <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Hover glow */}
+              <div 
+                className={`absolute inset-0 rounded-2xl transition-opacity duration-500 ${
+                  hoveredCard === i ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ 
+                  background: `radial-gradient(circle at 50% 0%, ${f.glow}, transparent 70%)` 
+                }}
+              />
 
               {/* Hover sparkle burst */}
               <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -175,11 +221,13 @@ export default function Features() {
               <p className="text-sm text-[#9b8d80] leading-relaxed font-semibold">{f.description}</p>
               
               {/* Learn more */}
-              <div className={`mt-5 flex items-center gap-2 text-amber-600 text-sm font-extrabold transition-all duration-300 ${
+              <div className={`mt-5 flex items-center gap-1.5 text-amber-600 text-sm font-extrabold transition-all duration-300 ${
                 hoveredCard === i ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
               }`}>
                 <span>Learn more</span>
-                <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${hoveredCard === i ? 'translate-x-1' : ''}`} />
+                <ArrowRight className={`w-4 h-4 transition-all duration-300 ${
+                  hoveredCard === i ? 'translate-x-1 opacity-100' : '-translate-x-2 opacity-0'
+                }`} />
               </div>
 
               {/* Emoji popup */}

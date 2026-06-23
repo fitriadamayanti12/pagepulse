@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import Link from 'next/link';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
@@ -15,6 +16,8 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [showResend, setShowResend] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,9 +26,22 @@ export default function LoginForm() {
     setShowResend(false);
 
     try {
+      // Dapatkan token reCAPTCHA
+      if (!executeRecaptcha) {
+        setError('Security check not ready. Please wait or refresh the page.');
+        setLoading(false);
+        return;
+      }
+
+      const captchaToken = await executeRecaptcha('login');
+
+      // Kirim token ke Supabase
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
-        password 
+        password,
+        options: {
+          captchaToken
+        }
       });
 
       if (error) {
@@ -42,7 +58,6 @@ export default function LoginForm() {
         setShowResend(true);
         await supabase.auth.signOut();
       } else {
-        // Set cookie untuk Supabase SSR
         if (data.session) {
           const projectRef = 'iflkaqpszfrxptcrktmz';
           const cookieName = `sb-${projectRef}-auth-token`;
@@ -65,6 +80,31 @@ export default function LoginForm() {
     setLoading(false);
   };
 
+  const handleResendEmail = useCallback(async () => {
+    if (!executeRecaptcha) return;
+    
+    try {
+      const captchaToken = await executeRecaptcha('resend_email');
+      
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          captchaToken
+        }
+      });
+      
+      if (error) {
+        setError(error.message);
+      } else {
+        setError('Verification email sent! Please check your inbox.');
+        setShowResend(false);
+      }
+    } catch (err) {
+      setError('Failed to resend email. Please try again.');
+    }
+  }, [email, executeRecaptcha]);
+
   return (
     <div className="bg-white/60 backdrop-blur-2xl rounded-3xl border-2 border-white/80 shadow-xl p-6">
       <form onSubmit={handleLogin} className="space-y-4">
@@ -84,7 +124,7 @@ export default function LoginForm() {
           error={error} 
           showResend={showResend} 
           loading={loading} 
-          onResendEmail={() => {}} 
+          onResendEmail={handleResendEmail} 
         />
         <SubmitButton loading={loading} />
       </form>

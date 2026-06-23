@@ -1,91 +1,119 @@
 'use client';
 
-import { Sparkles, Star, Heart, Moon, Gem, Cloud } from 'lucide-react';
+import { Sparkles, Star, Heart } from 'lucide-react';
 import { useState } from 'react';
 
-export default function CatIcon() {
-  const [isWinking, setIsWinking] = useState(false);
+interface CatIconProps {
+  size?: 'sm' | 'default' | 'lg';
+}
+
+export default function CatIcon({ size = 'default' }: CatIconProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const sizeConfig = {
+    sm: {
+      container: 'w-10 h-10 rounded-xl',
+      emoji: 'text-xl',
+      border: 'border-[1.5px]',
+      shadow: 'shadow-lg shadow-amber-100/30',
+    },
+    default: {
+      container: 'w-24 h-24 lg:w-28 lg:h-28 rounded-[2rem]',
+      emoji: 'text-5xl lg:text-6xl',
+      border: 'border-2',
+      shadow: 'shadow-2xl shadow-amber-200/30',
+    },
+    lg: {
+      container: 'w-32 h-32 lg:w-36 lg:h-36 rounded-[2.5rem]',
+      emoji: 'text-6xl lg:text-7xl',
+      border: 'border-[3px]',
+      shadow: 'shadow-2xl shadow-amber-300/40',
+    },
+  };
+
+  const config = sizeConfig[size];
+  const showDecorations = size !== 'sm';
 
   return (
-    <div 
-      className="relative"
-      onMouseEnter={() => setIsWinking(true)}
-      onMouseLeave={() => setIsWinking(false)}
+    <div
+      className="relative inline-flex"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Outer rainbow glow ring */}
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-300 via-orange-400 via-rose-400 to-violet-400 rounded-full blur-3xl opacity-30 animate-glow-pulse scale-125" />
+      {/* Glow ring behind */}
+      <div className={`absolute inset-0 bg-gradient-to-br from-amber-300/40 via-orange-300/30 to-rose-300/30 rounded-full blur-2xl transition-all duration-700 ${
+        isHovered ? 'scale-150 opacity-100' : 'scale-100 opacity-50'
+      }`} />
       
-      {/* Secondary glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-200 via-yellow-200 to-amber-200 rounded-full blur-2xl opacity-20 animate-float" style={{ animationDuration: '4s' }} />
+      {/* Secondary pulse glow */}
+      <div className={`absolute inset-0 bg-amber-300/20 rounded-full blur-xl animate-pulse-slow ${
+        isHovered ? 'scale-125' : 'scale-100'
+      }`} />
 
-      {/* Glass Card Container */}
-      <div className="relative w-28 h-28 lg:w-32 lg:h-32 bg-white/50 backdrop-blur-2xl rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-amber-200/25 border-2 border-white/80 group transition-all duration-500 hover:scale-105 hover:shadow-[0_0_60px_rgba(251,191,36,0.2)]">
+      {/* Main container - Glass morphism */}
+      <div
+        className={`relative ${config.container} ${config.border} ${config.shadow} 
+          bg-white/60 backdrop-blur-2xl border-white/80 
+          flex items-center justify-center 
+          transition-all duration-500 ease-out
+          hover:scale-110 hover:bg-white/80 hover:border-amber-300/60
+          hover:shadow-[0_0_80px_rgba(251,191,36,0.3)]`}
+      >
+        {/* Inner glass shine */}
+        <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-b from-white/40 via-transparent to-transparent pointer-events-none" />
         
-        {/* Top shine */}
-        <div className="absolute top-2 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
-        
-        {/* Cat Head */}
-        <div className={`relative w-14 h-12 bg-gradient-to-br from-amber-300 to-orange-400 rounded-[2.5rem] shadow-inner transition-transform duration-300 group-hover:scale-105 ${isWinking ? 'rotate-3' : 'rotate-0'}`}>
-          
-          {/* Ears dengan animasi wiggle */}
-          <div className="absolute -top-3 -left-1.5 w-0 h-0 border-l-[7px] border-r-[7px] border-b-[13px] border-l-transparent border-r-transparent border-b-amber-400 rotate-[-15deg] animate-wiggle-left" />
-          <div className="absolute -top-3 -right-1.5 w-0 h-0 border-l-[7px] border-r-[7px] border-b-[13px] border-l-transparent border-r-transparent border-b-amber-400 rotate-[15deg] animate-wiggle-right" />
-          
-          {/* Inner Ears */}
-          <div className="absolute -top-1.5 left-0.5 w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-pink-300 rotate-[-15deg]" />
-          <div className="absolute -top-1.5 right-0.5 w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-pink-300 rotate-[15deg]" />
+        {/* Bottom reflection */}
+        <div className="absolute bottom-1 left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-amber-300/20 to-transparent" />
 
-          {/* Eyes - Blinking + Winking */}
-          <div className={`absolute top-3 left-2.5 w-2 h-2.5 bg-slate-800 rounded-full transition-all duration-100 ${isWinking ? 'scale-y-[0.1]' : 'scale-y-100'}`}>
-            <div className="absolute top-0.5 left-0.5 w-0.5 h-0.5 bg-white rounded-full" />
+        {/* The Cat - using emoji for perfect rendering */}
+        <span 
+          className={`${config.emoji} transition-all duration-500 select-none ${
+            isHovered ? 'scale-125 animate-bounce-gentle' : 'scale-100'
+          }`}
+          style={{ 
+            filter: isHovered ? 'drop-shadow(0 8px 12px rgba(251,191,36,0.3))' : 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))',
+            transform: isHovered ? 'rotate(-5deg) scale(1.25)' : 'rotate(0deg) scale(1)',
+          }}
+        >
+          🐱
+        </span>
+
+        {/* Sparkle overlay on hover */}
+        {isHovered && (
+          <div className="absolute inset-0 rounded-[inherit] overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-1 h-3 bg-white/60 rounded-full rotate-45 animate-sparkle-pop" />
+            <div className="absolute top-1/2 right-1/3 w-1 h-3 bg-white/50 rounded-full -rotate-12 animate-sparkle-pop-delayed" />
+            <div className="absolute bottom-1/3 left-1/3 w-0.5 h-2 bg-white/70 rounded-full rotate-12 animate-sparkle-pop" style={{ animationDelay: '0.2s' }} />
           </div>
-          <div className="absolute top-3 right-2.5 w-2 h-2.5 bg-slate-800 rounded-full animate-cat-blink">
-            <div className="absolute top-0.5 right-0.5 w-0.5 h-0.5 bg-white rounded-full" />
-          </div>
-
-          {/* Blush dengan pulse */}
-          <div className="absolute top-4 left-1 w-3 h-1.5 bg-pink-300/50 rounded-full group-hover:bg-pink-400/60 transition-colors" />
-          <div className="absolute top-4 right-1 w-3 h-1.5 bg-pink-300/50 rounded-full group-hover:bg-pink-400/60 transition-colors" />
-
-          {/* Nose */}
-          <div className="absolute top-5 left-1/2 -translate-x-1/2 w-1.5 h-1 bg-pink-400 rounded-full group-hover:scale-110 transition-transform" />
-          
-          {/* Mouth - smile saat hover */}
-          <div className="absolute top-5.5 left-1/2 -translate-x-1/2 flex gap-0.5">
-            <div className={`w-1.5 h-0.5 border-b-2 border-amber-600 rounded-full transition-all duration-300 ${isWinking ? 'rotate-[-10deg] origin-right' : 'rotate-0'}`} />
-            <div className={`w-1.5 h-0.5 border-b-2 border-amber-600 rounded-full transition-all duration-300 ${isWinking ? 'rotate-[10deg] origin-left' : 'rotate-0'}`} />
-          </div>
-
-          {/* Whiskers dengan animasi subtle */}
-          <div className="absolute top-4 -left-2.5 w-4 h-px bg-amber-500/40 rounded-full transition-all duration-300 group-hover:bg-amber-500/60 group-hover:w-5" />
-          <div className="absolute top-5 -left-2.5 w-3.5 h-px bg-amber-500/40 rounded-full transition-all duration-300 group-hover:bg-amber-500/60 group-hover:w-4.5" />
-          <div className="absolute top-4 -right-2.5 w-4 h-px bg-amber-500/40 rounded-full transition-all duration-300 group-hover:bg-amber-500/60 group-hover:w-5" />
-          <div className="absolute top-5 -right-2.5 w-3.5 h-px bg-amber-500/40 rounded-full transition-all duration-300 group-hover:bg-amber-500/60 group-hover:w-4.5" />
-        </div>
+        )}
       </div>
 
-      {/* Floating decorations - Super Premium */}
-      {/* Sparkles - dengan orbit */}
-      <Sparkles className="absolute -top-2 -right-4 w-6 h-6 text-amber-400 animate-float drop-shadow-lg" style={{ animationDuration: '2.5s' }} />
-      
-      {/* Star - dengan rotate */}
-      <Star className="absolute -bottom-3 -left-4 w-5 h-5 text-orange-400 animate-float-delayed drop-shadow-lg hover:scale-125 transition-transform" style={{ animationDuration: '3.5s' }} />
-      
-      {/* Heart - dengan heartbeat */}
-      <Heart className="absolute top-1/2 -right-6 w-4 h-4 text-rose-400 animate-heart-beat drop-shadow-lg hover:scale-125 transition-transform" />
-      
-      {/* Moon - slow float */}
-      <Moon className="absolute -top-4 -left-5 w-4 h-4 text-violet-400/60 animate-float-slow drop-shadow-md" style={{ animationDuration: '5s' }} />
-      
-      {/* Gem - sparkle */}
-      <Gem className="absolute -bottom-1 -right-5 w-3.5 h-3.5 text-sky-400/50 animate-float drop-shadow-md" style={{ animationDuration: '4s', animationDelay: '1s' }} />
-      
-      {/* Cloud - gentle float */}
-      <Cloud className="absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 text-white/40 animate-float drop-shadow-sm" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+      {/* Floating decorations */}
+      {showDecorations && (
+        <>
+          {/* Star - top right */}
+          <div className={`absolute -top-3 -right-2 transition-all duration-500 ${
+            isHovered ? 'scale-125 -translate-y-2' : 'scale-100'
+          }`}>
+            <Star className="w-5 h-5 text-amber-400 fill-amber-300/30 drop-shadow-lg animate-float" style={{ animationDuration: '2.5s' }} />
+          </div>
 
-      {/* Extra sparkle particles */}
-      <div className="absolute -top-1 right-0 w-1.5 h-1.5 bg-amber-300/60 rounded-full animate-sparkle-burst" style={{ animationDelay: '0.5s' }} />
-      <div className="absolute bottom-0 left-0 w-1 h-1 bg-rose-300/60 rounded-full animate-sparkle-burst" style={{ animationDelay: '1s' }} />
+          {/* Heart - bottom left */}
+          <div className={`absolute -bottom-2 -left-3 transition-all duration-500 delay-75 ${
+            isHovered ? 'scale-125 -translate-x-1' : 'scale-100'
+          }`}>
+            <Heart className="w-4 h-4 text-rose-400 fill-rose-300/40 drop-shadow-lg animate-heart-beat" />
+          </div>
+
+          {/* Tiny sparkle particles */}
+          <div className={`absolute top-0 right-0 w-1.5 h-1.5 bg-amber-300 rounded-full transition-all duration-300 ${
+            isHovered ? 'opacity-100 scale-150' : 'opacity-0 scale-0'
+          }`} />
+          <div className={`absolute bottom-1 left-1 w-1 h-1 bg-rose-300 rounded-full transition-all duration-300 delay-100 ${
+            isHovered ? 'opacity-100 scale-150' : 'opacity-0 scale-0'
+          }`} />
+        </>
+      )}
     </div>
   );
 }

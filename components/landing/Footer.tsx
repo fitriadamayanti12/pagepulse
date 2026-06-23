@@ -2,72 +2,81 @@ import Link from 'next/link';
 import { BookOpen, Heart, Zap, ExternalLink, Shield, FileText } from 'lucide-react';
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear(); // Auto-update tahun
+
   return (
     <footer className="border-t-2 border-amber-100/40 py-8 bg-white/40 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Satu Baris: Logo | Copyright | Privacy • Terms | Auth Links | Powered By */}
+        {/* Satu Baris */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md shadow-amber-200/30 group-hover:scale-105 transition-transform">
-              <BookOpen className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center shadow-md shadow-amber-200/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <BookOpen className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
             </div>
-            <span className="text-base font-extrabold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <span className="text-base font-extrabold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-orange-500 transition-all">
               PagePulse
             </span>
           </Link>
 
-          {/* Divider */}
           <span className="text-amber-200 hidden sm:block">•</span>
 
-          {/* Copyright */}
+          {/* Copyright - AUTO YEAR */}
           <p className="text-[#9b8d80] font-bold flex items-center gap-1">
-            © 2025 Made with <Heart className="w-3.5 h-3.5 text-rose-400 animate-heart-beat inline" />
+            © {currentYear} Made with{' '}
+            <Heart className="w-3.5 h-3.5 text-rose-400 animate-heart-beat inline hover:scale-125 transition-transform" />
           </p>
 
-          {/* Divider */}
           <span className="text-amber-200 hidden sm:block">•</span>
 
-          {/* 🔑 PRIVACY & TERMS - SEJAJAR */}
+          {/* Privacy & Terms */}
           <div className="flex items-center gap-3 text-[#9b8d80] font-bold">
             <Link 
               href="/privacy" 
-              className="flex items-center gap-1.5 hover:text-amber-600 transition-colors"
+              className="flex items-center gap-1.5 hover:text-amber-600 transition-colors group"
             >
-              <Shield className="w-3.5 h-3.5" />
+              <Shield className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
               <span>Privacy</span>
             </Link>
             <span className="text-amber-200">•</span>
             <Link 
               href="/terms" 
-              className="flex items-center gap-1.5 hover:text-amber-600 transition-colors"
+              className="flex items-center gap-1.5 hover:text-amber-600 transition-colors group"
             >
-              <FileText className="w-3.5 h-3.5" />
+              <FileText className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
               <span>Terms</span>
             </Link>
           </div>
 
-          {/* Divider */}
           <span className="text-amber-200 hidden sm:block">•</span>
 
           {/* Auth Links */}
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-[#9b8d80] hover:text-amber-600 font-bold transition-colors">Sign In</Link>
-            <Link href="/signup" className="text-[#9b8d80] hover:text-amber-600 font-bold transition-colors">Sign Up</Link>
+            <Link 
+              href="/login" 
+              className="text-[#9b8d80] hover:text-amber-600 font-bold transition-colors hover:underline underline-offset-4 decoration-amber-300"
+            >
+              Sign In
+            </Link>
+            <Link 
+              href="/signup" 
+              className="text-[#9b8d80] hover:text-amber-600 font-bold transition-colors hover:underline underline-offset-4 decoration-amber-300"
+            >
+              Sign Up
+            </Link>
           </div>
 
-          {/* Divider */}
           <span className="text-amber-200 hidden sm:block">•</span>
 
-          {/* Powered by Next Generation */}
+          {/* Powered by */}
           <a
             href="https://xgeneration.netlify.app"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-violet-50/60 to-purple-50/60 hover:from-violet-100/70 hover:to-purple-100/70 rounded-xl border border-violet-200/40 hover:border-violet-300/60 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
+            className="group inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-violet-50/60 to-purple-50/60 hover:from-violet-100/70 hover:to-purple-100/70 rounded-xl border border-violet-200/40 hover:border-violet-300/60 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer hover:scale-105"
             title="Visit Next Generation"
           >
-            <Zap className="w-3.5 h-3.5 text-violet-500 group-hover:text-violet-600 transition-colors" />
+            <Zap className="w-3.5 h-3.5 text-violet-500 group-hover:text-violet-600 group-hover:scale-110 transition-all" />
             <span className="text-xs font-bold text-violet-600/80 group-hover:text-violet-700 transition-colors">
               Powered by
             </span>

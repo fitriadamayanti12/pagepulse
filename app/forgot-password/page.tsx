@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,21 +13,38 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    try {
+      // Dapatkan token reCAPTCHA
+      if (!executeRecaptcha) {
+        setError('Security check not ready. Please wait or refresh.');
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setSent(true);
+      const captchaToken = await executeRecaptcha('forgot_password');
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+        captchaToken
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setSent(true);
+      }
+    } catch (err) {
+      setError('Unexpected error. Please try again.');
     }
+    
     setLoading(false);
   };
 

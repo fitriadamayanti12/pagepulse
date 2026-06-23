@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import Link from 'next/link';
 import EmailField from './EmailField';
 import PasswordField from './PasswordField';
@@ -18,6 +19,8 @@ export default function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,17 +52,34 @@ export default function SignupForm() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/login` },
-    });
+    try {
+      // Dapatkan token reCAPTCHA
+      if (!executeRecaptcha) {
+        setError('Security check not ready. Please wait or refresh the page.');
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
+      const captchaToken = await executeRecaptcha('signup');
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+          captchaToken
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      }
+    } catch (err) {
+      setError('Unexpected error occurred. Please try again.');
       setLoading(false);
-    } else {
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     }
   };
 
